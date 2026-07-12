@@ -11,6 +11,7 @@ import { normalizeString, getPhysicalZone, getAvailableZones, groupMartyrsByRow,
 import { LotusMotif, CloudDivider } from "@/app/components/VietnameseMotifs";
 import ProjectIntro from "@/app/components/ProjectIntro";
 import CemeteryDropdown from "@/app/components/CemeteryDropdown";
+import { createClient } from "@/utils/supabase/client";
 
 // Lazy-load heavy interactive components
 const CemeteryMap = dynamic(() => import("@/app/components/CemeteryMap"), {
@@ -214,23 +215,27 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
     }
   }, []);
 
-  // Fetch martyrs data when cemetery changes
+  // Fetch martyrs data from Supabase when cemetery changes
   useEffect(() => {
     if (!selectedCemetery) {
       setMartyrs([]);
       return;
     }
-    const slug = CEMETERY_TO_SLUG[selectedCemetery];
-    if (!slug) return;
 
     setDataLoading(true);
-    fetch(`/data/${slug}.json`)
-      .then(res => res.json())
-      .then((data: Martyr[]) => {
-        setMartyrs(data.map(m => ({ ...m, cemetery: m.cemetery.normalize("NFC") })));
-      })
-      .catch(() => setMartyrs([]))
-      .finally(() => setDataLoading(false));
+    const supabase = createClient();
+    supabase
+      .from("martyrs")
+      .select("*")
+      .eq("cemetery", selectedCemetery)
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setMartyrs([]);
+        } else {
+          setMartyrs(data.map(m => ({ ...m, cemetery: m.cemetery.normalize("NFC") })));
+        }
+        setDataLoading(false);
+      });
   }, [selectedCemetery]);
 
   // Sync state changes back to URL pathname
