@@ -17,6 +17,8 @@ import CemeterySelectionModal from "@/app/components/CemeterySelectionModal";
 import BackgroundMusic from "@/app/components/BackgroundMusic";
 import CemeteryMap from "@/app/components/CemeteryMap";
 import MartyrBottomCard from "@/app/components/MartyrBottomCard";
+import { Modal } from "react-responsive-modal";
+import "react-responsive-modal/styles.css";
 
 const SLUG_TO_CEMETERY: Record<string, string> = {
   "tu-ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
@@ -465,221 +467,195 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
       )}
 
       {/* ── Filter modal ───────────────────────────────────────────────────────── */}
-      {isFilterModalOpen && (
-        <div 
-          className="modal-overlay filter-modal-overlay" 
-          onClick={() => setIsFilterModalOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "1rem",
-            boxSizing: "border-box"
-          }}
-        >
-          <div 
-            className="modal-container"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: "#FAF6EE",
-              border: "2px solid #E4D8C3",
-              borderRadius: "16px",
-              width: "100%",
-              maxWidth: "600px",
-              maxHeight: "90vh",
-              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden"
-            }}
-          >
-            {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderBottom: "1px solid #EADFCE", flexShrink: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Filter size={18} style={{ color: "var(--gold)" }} />
-                <h3 style={{ margin: 0, fontSize: "1.15rem", fontFamily: "var(--font-serif)", color: "var(--text-bright)" }}>Tìm kiếm & Lọc liệt sĩ</h3>
+      <Modal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        showCloseIcon={false}
+        classNames={{
+          overlay: "custom-modal-overlay",
+          modal: "custom-modal-container-filter",
+        }}
+        center
+      >
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", overflow: "hidden" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderBottom: "1px solid #EADFCE", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Filter size={18} style={{ color: "var(--gold)" }} />
+              <h3 style={{ margin: 0, fontSize: "1.15rem", fontFamily: "var(--font-serif)", color: "var(--text-bright)" }}>Tìm kiếm & Lọc liệt sĩ</h3>
+            </div>
+          </div>
+
+          {/* Content (Body - Scrollable) */}
+          <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem", flex: 1, overflowY: "auto" }}>
+            {/* Grid search inputs */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }} className="filter-grid-2col">
+              {/* Cemetery select */}
+              <div className="sidebar-search-group" style={{ gridColumn: "1 / -1" }}>
+                <label className="sidebar-search-label" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Nghĩa trang</label>
+                <button
+                  type="button"
+                  onClick={() => setIsCemeteryModalOpen(true)}
+                  style={{
+                    width: "100%",
+                    borderColor: "#DDD4C0",
+                    padding: "0.6rem 1rem",
+                    borderRadius: "8px",
+                    border: "1px solid #DDD4C0",
+                    fontSize: "0.9rem",
+                    textAlign: "left",
+                    backgroundColor: "#FFFFFF",
+                    color: selectedCemetery ? "var(--text-bright)" : "var(--text-muted)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer"
+                  }}
+                >
+                  <span>{selectedCemetery || "Chọn nghĩa trang..."}</span>
+                  <Map size={14} style={{ color: "var(--text-muted)" }} />
+                </button>
               </div>
 
+              {/* Name search */}
+              <div className="sidebar-search-group">
+                <label className="sidebar-search-label" htmlFor="modal-filter-name" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Họ và tên</label>
+                <div style={{ position: "relative" }}>
+                  <input 
+                    id="modal-filter-name" 
+                    type="text" 
+                    className="sidebar-search-input"
+                    style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
+                    placeholder="Tìm tên..."
+                    value={searchName} 
+                    onChange={(e) => setSearchName(e.target.value)} 
+                  />
+                  <Search size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+                </div>
+              </div>
+
+              {/* Hometown search */}
+              <div className="sidebar-search-group">
+                <label className="sidebar-search-label" htmlFor="modal-filter-hometown" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Quê quán</label>
+                <div style={{ position: "relative" }}>
+                  <input 
+                    id="modal-filter-hometown" 
+                    type="text" 
+                    className="sidebar-search-input"
+                    style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
+                    placeholder="Quê quán..."
+                    value={searchHometown} 
+                    onChange={(e) => setSearchHometown(e.target.value)} 
+                  />
+                  <MapPin size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+                </div>
+              </div>
+
+              {/* Birth year search */}
+              <div className="sidebar-search-group">
+                <label className="sidebar-search-label" htmlFor="modal-filter-birth" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Năm sinh</label>
+                <div style={{ position: "relative" }}>
+                  <input 
+                    id="modal-filter-birth" 
+                    type="text" 
+                    className="sidebar-search-input"
+                    style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
+                    placeholder="Ví dụ: 1930"
+                    value={searchBirthYear} 
+                    onChange={(e) => setSearchBirthYear(e.target.value)} 
+                  />
+                  <Calendar size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+                </div>
+              </div>
+
+              {/* Zone select (only when a cemetery is selected) */}
+              {selectedCemetery && (
+                <div className="sidebar-search-group">
+                  <label className="sidebar-search-label" htmlFor="modal-filter-zone" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Khu vực</label>
+                  <div className="select-wrapper" style={{ position: "relative" }}>
+                    <select
+                      id="modal-filter-zone"
+                      className="sidebar-search-input"
+                      value={selectedZone}
+                      onChange={(e) => setSelectedZone(e.target.value)}
+                      style={{ appearance: "none", width: "100%", borderColor: "#DDD4C0", padding: "0.6rem 2.2rem 0.6rem 1rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", outline: "none", backgroundColor: "#FFFFFF" }}
+                    >
+                      <option value="">Tất cả các khu</option>
+                      {availableZones.map((z) => (
+                        <option key={z} value={z}>Khu {z}</option>
+                      ))}
+                    </select>
+                    <Map size={14} className="select-arrow" style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-muted)" }} />
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Content (Body - Scrollable) */}
-            <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem", flex: 1, overflowY: "auto" }}>
-              {/* Grid search inputs */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }} className="filter-grid-2col">
-                {/* Cemetery select */}
-                <div className="sidebar-search-group" style={{ gridColumn: "1 / -1" }}>
-                  <label className="sidebar-search-label" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Nghĩa trang</label>
-                  <button
-                    type="button"
-                    onClick={() => setIsCemeteryModalOpen(true)}
-                    style={{
-                      width: "100%",
-                      borderColor: "#DDD4C0",
-                      padding: "0.6rem 1rem",
-                      borderRadius: "8px",
-                      border: "1px solid #DDD4C0",
-                      fontSize: "0.9rem",
-                      textAlign: "left",
-                      backgroundColor: "#FFFFFF",
-                      color: selectedCemetery ? "var(--text-bright)" : "var(--text-muted)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer"
-                    }}
-                  >
-                    <span>{selectedCemetery || "Chọn nghĩa trang..."}</span>
-                    <Map size={14} style={{ color: "var(--text-muted)" }} />
-                  </button>
-                </div>
+            {/* Divider */}
+            <div style={{ height: "1px", backgroundColor: "#EADFCE", margin: "0.5rem 0" }} />
 
-                {/* Name search */}
-                <div className="sidebar-search-group">
-                  <label className="sidebar-search-label" htmlFor="modal-filter-name" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Họ và tên</label>
-                  <div style={{ position: "relative" }}>
-                    <input 
-                      id="modal-filter-name" 
-                      type="text" 
-                      className="sidebar-search-input"
-                      style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
-                      placeholder="Tìm tên..."
-                      value={searchName} 
-                      onChange={(e) => setSearchName(e.target.value)} 
-                    />
-                    <Search size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-                  </div>
-                </div>
+            {/* Results List inside Modal */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #EADFCE", paddingBottom: "0.4rem", marginBottom: "0.75rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-bright)", letterSpacing: "0.05em" }}>DANH SÁCH ANH HÙNG LIỆT SĨ</span>
+                <span style={{ fontSize: "0.8rem", color: "var(--gold-dark)", fontWeight: "600" }}>{filteredMartyrs.length} phần mộ</span>
+              </div>
 
-                {/* Hometown search */}
-                <div className="sidebar-search-group">
-                  <label className="sidebar-search-label" htmlFor="modal-filter-hometown" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Quê quán</label>
-                  <div style={{ position: "relative" }}>
-                    <input 
-                      id="modal-filter-hometown" 
-                      type="text" 
-                      className="sidebar-search-input"
-                      style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
-                      placeholder="Quê quán..."
-                      value={searchHometown} 
-                      onChange={(e) => setSearchHometown(e.target.value)} 
-                    />
-                    <MapPin size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-                  </div>
-                </div>
-
-                {/* Birth year search */}
-                <div className="sidebar-search-group">
-                  <label className="sidebar-search-label" htmlFor="modal-filter-birth" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Năm sinh</label>
-                  <div style={{ position: "relative" }}>
-                    <input 
-                      id="modal-filter-birth" 
-                      type="text" 
-                      className="sidebar-search-input"
-                      style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
-                      placeholder="Ví dụ: 1930"
-                      value={searchBirthYear} 
-                      onChange={(e) => setSearchBirthYear(e.target.value)} 
-                    />
-                    <Calendar size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-                  </div>
-                </div>
-
-                {/* Zone select (only when a cemetery is selected) */}
-                {selectedCemetery && (
-                  <div className="sidebar-search-group">
-                    <label className="sidebar-search-label" htmlFor="modal-filter-zone" style={{ display: "block", marginBottom: "0.4rem", fontWeight: "600", fontSize: "0.85rem", color: "var(--text-bright)" }}>Khu vực</label>
-                    <div className="select-wrapper" style={{ position: "relative" }}>
-                      <select
-                        id="modal-filter-zone"
-                        className="sidebar-search-input"
-                        value={selectedZone}
-                        onChange={(e) => setSelectedZone(e.target.value)}
-                        style={{ appearance: "none", width: "100%", borderColor: "#DDD4C0", padding: "0.6rem 2.2rem 0.6rem 1rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", outline: "none", backgroundColor: "#FFFFFF" }}
-                      >
-                        <option value="">Tất cả các khu</option>
-                        {availableZones.map((z) => (
-                          <option key={z} value={z}>Khu {z}</option>
-                        ))}
-                      </select>
-                      <Map size={14} className="select-arrow" style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-muted)" }} />
+              <div style={{ maxHeight: "300px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                {filteredMartyrs.length > 0 ? (
+                  filteredMartyrs.map((m) => (
+                    <div
+                      key={m.id}
+                      onClick={() => handleOpenDetails(m)}
+                      className="martyr-list-card"
+                    >
+                      <div style={{ color: "var(--primary-red)", fontWeight: 700, fontSize: "0.95rem" }}>{m.name}</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                        <span><strong>Năm sinh:</strong> {m.birth_year || "Chưa rõ"}</span>
+                        <span className="truncate"><strong>Quê quán:</strong> {m.hometown || "Chưa rõ"}</span>
+                        <span><strong>Vị trí:</strong> Mộ {m.grave_no || "—"}, Hàng {m.row_no || "—"}, Khu {getPhysicalZone(m)}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+                        <button
+                          className="btn btn-gold btn-sm"
+                          onClick={(e) => { e.stopPropagation(); handleLocateMartyrGrave(m); setIsFilterModalOpen(false); }}
+                          style={{ padding: "0.3rem 0.7rem", fontSize: "0.75rem", backgroundColor: "var(--gold)", color: "#FFFFFF", border: "none", borderRadius: "4px", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.35rem", transition: "background-color 0.2s" }}
+                        >
+                          <Crosshair size={12} /> Xem vị trí trên sơ đồ
+                        </button>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: "center", padding: "2rem 0", color: "var(--text-muted)" }}>
+                    <Info size={32} style={{ color: "var(--gold)", marginBottom: "0.5rem", opacity: 0.6 }} />
+                    <p style={{ fontSize: "0.85rem", fontWeight: 600 }}>Không tìm thấy liệt sĩ</p>
+                    <p style={{ fontSize: "0.75rem" }}>Vui lòng thay đổi thông tin lọc.</p>
                   </div>
                 )}
               </div>
 
-              {/* Divider */}
-              <div style={{ height: "1px", backgroundColor: "#EADFCE", margin: "0.5rem 0" }} />
-
-              {/* Results List inside Modal */}
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #EADFCE", paddingBottom: "0.4rem", marginBottom: "0.75rem" }}>
-                  <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-bright)", letterSpacing: "0.05em" }}>DANH SÁCH ANH HÙNG LIỆT SĨ</span>
-                  <span style={{ fontSize: "0.8rem", color: "var(--gold-dark)", fontWeight: "600" }}>{filteredMartyrs.length} phần mộ</span>
-                </div>
-
-                <div style={{ maxHeight: "300px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                  {filteredMartyrs.length > 0 ? (
-                    filteredMartyrs.map((m) => (
-                      <div
-                        key={m.id}
-                        onClick={() => handleOpenDetails(m)}
-                        className="martyr-list-card"
-                      >
-                        <div style={{ color: "var(--primary-red)", fontWeight: 700, fontSize: "0.95rem" }}>{m.name}</div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
-                          <span><strong>Năm sinh:</strong> {m.birth_year || "Chưa rõ"}</span>
-                          <span className="truncate"><strong>Quê quán:</strong> {m.hometown || "Chưa rõ"}</span>
-                          <span><strong>Vị trí:</strong> Mộ {m.grave_no || "—"}, Hàng {m.row_no || "—"}, Khu {getPhysicalZone(m)}</span>
-                        </div>
-                        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
-                          <button
-                            className="btn btn-gold btn-sm"
-                            onClick={(e) => { e.stopPropagation(); handleLocateMartyrGrave(m); setIsFilterModalOpen(false); }}
-                            style={{ padding: "0.3rem 0.7rem", fontSize: "0.75rem", backgroundColor: "var(--gold)", color: "#FFFFFF", border: "none", borderRadius: "4px", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.35rem", transition: "background-color 0.2s" }}
-                          >
-                            <Crosshair size={12} /> Xem vị trí trên sơ đồ
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ textAlign: "center", padding: "2rem 0", color: "var(--text-muted)" }}>
-                      <Info size={32} style={{ color: "var(--gold)", marginBottom: "0.5rem", opacity: 0.6 }} />
-                      <p style={{ fontSize: "0.85rem", fontWeight: 600 }}>Không tìm thấy liệt sĩ</p>
-                      <p style={{ fontSize: "0.75rem" }}>Vui lòng thay đổi thông tin lọc.</p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderTop: "1px solid #EADFCE", backgroundColor: "#FAF6EE", flexShrink: 0 }} className="modal-footer-actions">
-              <button
-                className="btn btn-secondary"
-                onClick={handleResetFilters}
-                style={{ padding: "0.6rem 1rem", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--primary-red)", borderColor: "#E4D8C3", borderRadius: "6px" }}
-              >
-                <RotateCcw size={14} /> Xóa bộ lọc
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => setIsFilterModalOpen(false)}
-                style={{ padding: "0.6rem 1.25rem", fontSize: "0.85rem", fontWeight: "600", color: "#FFFFFF", borderRadius: "6px" }}
-              >
-                Đóng
-              </button>
             </div>
           </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderTop: "1px solid #EADFCE", backgroundColor: "#FAF6EE", flexShrink: 0 }} className="modal-footer-actions">
+            <button
+              className="btn btn-secondary"
+              onClick={handleResetFilters}
+              style={{ padding: "0.6rem 1rem", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--primary-red)", borderColor: "#E4D8C3", borderRadius: "6px" }}
+            >
+              <RotateCcw size={14} /> Xóa bộ lọc
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsFilterModalOpen(false)}
+              style={{ padding: "0.6rem 1.25rem", fontSize: "0.85rem", fontWeight: "600", color: "#FFFFFF", borderRadius: "6px" }}
+            >
+              Đóng
+            </button>
+          </div>
         </div>
-      )}
+      </Modal>
 
       {isCemeteryModalOpen && (
         <CemeterySelectionModal
