@@ -1,8 +1,9 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars */
 
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone, groupMartyrsByRow } from "@/app/lib/martyrUtils";
 
@@ -36,26 +37,33 @@ export default function CemeteryMap({
   onSelectZone
 }: CemeteryMapProps) {
 
-  // --- Zoom & Pan State ---
-  const [scale, setScale] = useState(1);
-  const [translateX, setTranslateX] = useState(0);
-  const [translateY, setTranslateY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const hasCaptured = useRef(false);
-  const pointerDownCoords = useRef({ x: 0, y: 0 });
-
-  // Refs for tracking multi-touch pointers & pinch-zoom params
-  const activePointers = useRef<{ pointerId: number; clientX: number; clientY: number }[]>([]);
-  const pinchStartDist = useRef<number>(0);
-  const pinchStartScale = useRef<number>(1);
-  const pinchStartCenter = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const pinchStartTranslate = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
   // --- Tooltip & Interaction State ---
   const [hoveredMartyr, setHoveredMartyr] = useState<Martyr | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+
+  // --- Responsive / Mobile detection & Auto-Centering ---
+  const [isMobile, setIsMobile] = useState(false);
+  const transformRef = useRef<ReactZoomPanPinchRef>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Programmatically trigger centering after layout shifts have settled
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (transformRef.current) {
+        transformRef.current.centerView(isMobile ? 2.5 : 1, 0);
+      }
+    }, 150); // Small delay to let browser lay out the flexbox dimensions
+    return () => clearTimeout(timer);
+  }, [selectedCemetery, isMobile]);
 
   const isTuKy = selectedCemetery === "Nghĩa trang liệt sĩ Tứ Kỳ";
   const isQuangKhai = selectedCemetery === "Nghĩa trang liệt sĩ Quang Khải";
@@ -87,327 +95,232 @@ export default function CemeteryMap({
     return result;
   }, [selectedCemetery, allMartyrs]);
 
-  // Auto-zoom/focus disabled by user request
-
-  const zoomIn = () => setScale(prev => Math.min(prev + 0.5, 4));
-  const zoomOut = () => {
-    setScale(prev => {
-      const next = Math.max(prev - 0.5, 1);
-      if (next === 1) {
-        setTranslateX(0);
-        setTranslateY(0);
-      }
-      return next;
-    });
-  };
-  const resetZoom = () => {
-    setScale(1);
-    setTranslateX(0);
-    setTranslateY(0);
-    activePointers.current = [];
-    pinchStartDist.current = 0;
-  };
-
-  // Reset zoom on cemetery change
-  useEffect(() => {
-    resetZoom();
-  }, [selectedCemetery]);
-
   const handlePointerOverGrave = (e: React.PointerEvent, martyr: Martyr) => {
+    if (isMobile) return;
     setHoveredMartyr(martyr);
     setTooltipPos({ x: e.clientX, y: e.clientY });
   };
 
   const handlePointerMoveGrave = (e: React.PointerEvent) => {
+    if (isMobile) return;
     setTooltipPos({ x: e.clientX, y: e.clientY });
   };
 
   const handlePointerOutGrave = () => {
+    if (isMobile) return;
     setHoveredMartyr(null);
-  };
-
-  const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-    const zoomIntensity = 0.05;
-    const delta = -e.deltaY;
-    setScale((prevScale) => {
-      const nextScale = Math.max(1, Math.min(prevScale + (delta > 0 ? 1 : -1) * zoomIntensity, 4));
-      if (nextScale === 1) {
-        setTranslateX(0);
-        setTranslateY(0);
-      }
-      return nextScale;
-    });
-  };
-
-  const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-
-    // Track active pointer info
-    const pointerList = activePointers.current;
-    const existingIdx = pointerList.findIndex(p => p.pointerId === e.pointerId);
-    const pointerData = { pointerId: e.pointerId, clientX: e.clientX, clientY: e.clientY };
-    if (existingIdx !== -1) {
-      pointerList[existingIdx] = pointerData;
-    } else {
-      pointerList.push(pointerData);
-    }
-
-    hasCaptured.current = false;
-
-    if (pointerList.length === 1) {
-      setIsDragging(true);
-      dragStart.current = { x: e.clientX - translateX, y: e.clientY - translateY };
-      pointerDownCoords.current = { x: e.clientX, y: e.clientY };
-    } else if (pointerList.length === 2) {
-      setIsDragging(false);
-      try {
-        e.currentTarget.setPointerCapture(pointerList[0].pointerId);
-        e.currentTarget.setPointerCapture(pointerList[1].pointerId);
-      } catch {
-        // Ignore if setPointerCapture fails
-      }
-      const p1 = pointerList[0];
-      const p2 = pointerList[1];
-      const dx = p1.clientX - p2.clientX;
-      const dy = p1.clientY - p2.clientY;
-      pinchStartDist.current = Math.sqrt(dx * dx + dy * dy);
-      pinchStartScale.current = scale;
-      pinchStartCenter.current = {
-        x: (p1.clientX + p2.clientX) / 2,
-        y: (p1.clientY + p2.clientY) / 2
-      };
-      pinchStartTranslate.current = { x: translateX, y: translateY };
-    }
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    const pointerList = activePointers.current;
-    const idx = pointerList.findIndex(p => p.pointerId === e.pointerId);
-    if (idx !== -1) {
-      pointerList[idx] = { pointerId: e.pointerId, clientX: e.clientX, clientY: e.clientY };
-    } else {
-      pointerList.push({ pointerId: e.pointerId, clientX: e.clientX, clientY: e.clientY });
-    }
-
-    if (pointerList.length === 1 && isDragging) {
-      if (!hasCaptured.current) {
-        const dx = e.clientX - pointerDownCoords.current.x;
-        const dy = e.clientY - pointerDownCoords.current.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance > 3) {
-          hasCaptured.current = true;
-          try {
-            e.currentTarget.setPointerCapture(e.pointerId);
-          } catch {
-            // Ignore
-          }
-        }
-      }
-
-      if (hasCaptured.current) {
-        const newX = e.clientX - dragStart.current.x;
-        const newY = e.clientY - dragStart.current.y;
-
-        // Bound movement based on scale
-        const limitX = 400 * scale;
-        const limitY = 250 * scale;
-        setTranslateX(Math.max(-limitX, Math.min(limitX, newX)));
-        setTranslateY(Math.max(-limitY, Math.min(limitY, newY)));
-      }
-
-    } else if (pointerList.length === 2) {
-      const p1 = pointerList[0];
-      const p2 = pointerList[1];
-      const dx = p1.clientX - p2.clientX;
-      const dy = p1.clientY - p2.clientY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (pinchStartDist.current > 0) {
-        const factor = dist / pinchStartDist.current;
-        const nextScale = Math.max(1, Math.min(pinchStartScale.current * factor, 4));
-        setScale(nextScale);
-
-        // Compute current pinch midpoint
-        const currentCenterX = (p1.clientX + p2.clientX) / 2;
-        const currentCenterY = (p1.clientY + p2.clientY) / 2;
-
-        // Formula: translation = current midpoint - (scale_ratio * offset_from_midpoint_to_previous_origin)
-        const nextTranslateX = currentCenterX - (nextScale / pinchStartScale.current) * (pinchStartCenter.current.x - pinchStartTranslate.current.x);
-        const nextTranslateY = currentCenterY - (nextScale / pinchStartScale.current) * (pinchStartCenter.current.y - pinchStartTranslate.current.y);
-
-        const limitX = 400 * nextScale;
-        const limitY = 250 * nextScale;
-        setTranslateX(Math.max(-limitX, Math.min(limitX, nextTranslateX)));
-        setTranslateY(Math.max(-limitY, Math.min(limitY, nextTranslateY)));
-      }
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      // Ignore errors
-    }
-
-    activePointers.current = activePointers.current.filter(p => p.pointerId !== e.pointerId);
-    const pointerList = activePointers.current;
-
-    if (pointerList.length === 1) {
-      // Seamless fallback to single-finger dragging
-      const remainingPointer = pointerList[0];
-      setIsDragging(true);
-      dragStart.current = {
-        x: remainingPointer.clientX - translateX,
-        y: remainingPointer.clientY - translateY
-      };
-      pointerDownCoords.current = {
-        x: remainingPointer.clientX,
-        y: remainingPointer.clientY
-      };
-      hasCaptured.current = false;
-    } else if (pointerList.length === 0) {
-      setIsDragging(false);
-      hasCaptured.current = false;
-    }
   };
 
   // Is the selected cemetery Minh Đức? (We draw local landscape details like ponds)
   const isMinhDuc = selectedCemetery === "Nghĩa trang liệt sĩ Minh Đức";
 
+  // Find the exact X and Y coordinates of a martyr in the SVG coordinate space (0-1000, 0-562)
+  const getMartyrCoordinates = (martyrId: string) => {
+    const martyr = allMartyrs.find(m => m.id === martyrId);
+    if (!martyr) return null;
+
+    const zoneName = getPhysicalZone(martyr);
+    if (zoneName !== "A" && zoneName !== "B") return null;
+
+    const { rows, maxCols, boundary } = graveLayoutData[zoneName];
+    const { xStart, yStart, width, height } = boundary;
+
+    // Find the row index and column index of the martyr in this zone
+    let rowIndex = -1;
+    let colIndex = -1;
+    
+    for (let r = 0; r < rows.length; r++) {
+      const c = rows[r].martyrs.findIndex(m => m.id === martyrId);
+      if (c !== -1) {
+        rowIndex = r;
+        colIndex = c;
+        break;
+      }
+    }
+
+    if (rowIndex === -1 || colIndex === -1) return null;
+
+    const R = rows.length;
+    const cellGap = 3;
+    const cellW = (width / maxCols) - cellGap;
+    const cellH = (height / R) - cellGap;
+
+    const isExtraGrave = isMinhDuc && zoneName === "B" && rowIndex < 3 && colIndex >= 6;
+    const xOffset = isExtraGrave ? 35 : 0;
+
+    const cellX = xStart + colIndex * (width / maxCols) + cellGap / 2 + xOffset;
+    const cellY = yStart + rowIndex * (height / R) + cellGap / 2;
+
+    return {
+      x: cellX + cellW / 2,
+      y: cellY + cellH / 2
+    };
+  };
+
+  // Programmatically zoom and center on a selected martyr's grave on mobile
+  useEffect(() => {
+    if (!selectedMartyrId || !isMobile) return;
+
+    const timer = setTimeout(() => {
+      const wrapper = mapContainerRef.current;
+      if (!wrapper || !transformRef.current) return;
+
+      const W = wrapper.clientWidth;
+      const H = wrapper.clientHeight;
+
+      const coords = getMartyrCoordinates(selectedMartyrId);
+      if (coords) {
+        const s = 3.5; // Zoom scale for grave focus
+        const lx = coords.x * (W / 1000);
+        const ly = coords.y * (W / 1000);
+        const tx = (W / 2) - (lx * s);
+        const ty = (H / 2) - (ly * s);
+        
+        transformRef.current.setTransform(tx, ty, s, 600); // 600ms smooth transition
+      }
+    }, 250); // Delay to let search panels/modals close and layout settle
+
+    return () => clearTimeout(timer);
+  }, [selectedMartyrId, isMobile]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%", height: "100%" }}>
       {/* Programmatic Vector Map Canvas */}
-      <div 
-        ref={mapContainerRef}
-        className="cemetery-map-container"
+      <TransformWrapper
+        ref={transformRef}
+        key={`${selectedCemetery}-${isMobile}`}
+        initialScale={isMobile ? 2.5 : 1}
+        minScale={1}
+        maxScale={4}
+        limitToBounds={!isMobile}
+        centerOnInit={true}
+        centerZoomedOut={true}
       >
-        {/* Floating map controls */}
-        <div 
-          style={{ 
-            position: "absolute", 
-            bottom: "12px", 
-            left: "12px", 
-            display: "flex", 
-            flexDirection: "row", 
-            gap: "8px",
-            zIndex: 10
-          }}
-        >
-          <button 
-            onClick={zoomIn} 
-            title="Phóng to bản đồ"
-            style={{ 
-              width: "40px", 
-              height: "40px", 
-              borderRadius: "8px", 
-              backgroundColor: "#FFFFFF", 
-              border: "1px solid var(--card-border)", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "var(--text-bright)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              transition: "background-color 0.2s"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
-          >
-            <ZoomIn size={20} />
-          </button>
-          <button 
-            onClick={zoomOut} 
-            title="Thu nhỏ bản đồ"
-            style={{ 
-              width: "40px", 
-              height: "40px", 
-              borderRadius: "8px", 
-              backgroundColor: "#FFFFFF", 
-              border: "1px solid var(--card-border)", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "var(--text-bright)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              transition: "background-color 0.2s"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
-          >
-            <ZoomOut size={20} />
-          </button>
-          <button 
-            onClick={resetZoom} 
-            title="Đặt lại bản đồ về mặc định"
-            style={{ 
-              width: "40px", 
-              height: "40px", 
-              borderRadius: "8px", 
-              backgroundColor: "#FFFFFF", 
-              border: "1px solid var(--card-border)", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "var(--text-bright)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              transition: "background-color 0.2s"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
-          >
-            <RotateCcw size={16} />
-          </button>
-        </div>
-
-        {/* SVG Programmatic Overlay */}
-        <svg 
-          viewBox="0 0 1000 562" 
-          style={{ 
-            width: "100%", 
-            height: "100%", 
-            display: "block",
-            touchAction: "none"
-          }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-          onWheel={handleWheel}
-        >
-          {/* Dot Grid Pattern */}
-          <defs>
-            <pattern id="dotGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <circle cx="10" cy="10" r="0.75" fill="rgba(164,123,46,0.15)" />
-            </pattern>
-          </defs>
-          <rect width="1000" height="562" fill="url(#dotGrid)" />
-
-          {/* Group wrapper with zoom/pan applied */}
-          <g
-            style={{
-              transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-              transformOrigin: "500px 281px",
-              transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-              cursor: isDragging ? "grabbing" : "grab"
-            }}
-          >
-            {/* Dong Son Drum Watermark Background */}
-            <image 
-              href="/trong_dong.svg"
-              x="200" 
-              y="-19" 
-              width="600" 
-              height="600" 
-              opacity="0.035"
-              style={{
-                pointerEvents: "none",
-                filter: "invert(53%) sepia(35%) saturate(1067%) hue-rotate(354deg) brightness(94%) contrast(92%)"
+        {({ zoomIn, zoomOut, resetTransform }) => (
+          <div ref={mapContainerRef} className="cemetery-map-container" style={{ position: "relative" }}>
+            {/* Floating map controls */}
+            <div 
+              style={{ 
+                position: "absolute", 
+                bottom: "12px", 
+                left: "12px", 
+                display: "flex", 
+                flexDirection: "row", 
+                gap: "8px",
+                zIndex: 10
               }}
-            />
+            >
+              <button 
+                onClick={() => zoomIn()} 
+                title="Phóng to bản đồ"
+                style={{ 
+                  width: "40px", 
+                  height: "40px", 
+                  borderRadius: "8px", 
+                  backgroundColor: "#FFFFFF", 
+                  border: "1px solid var(--card-border)", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--text-bright)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  transition: "background-color 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
+              >
+                <ZoomIn size={20} />
+              </button>
+              <button 
+                onClick={() => zoomOut()} 
+                title="Thu nhỏ bản đồ"
+                style={{ 
+                  width: "40px", 
+                  height: "40px", 
+                  borderRadius: "8px", 
+                  backgroundColor: "#FFFFFF", 
+                  border: "1px solid var(--card-border)", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--text-bright)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  transition: "background-color 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
+              >
+                <ZoomOut size={20} />
+              </button>
+              <button 
+                onClick={() => resetTransform()} 
+                title="Đặt lại bản đồ về mặc định"
+                style={{ 
+                  width: "40px", 
+                  height: "40px", 
+                  borderRadius: "8px", 
+                  backgroundColor: "#FFFFFF", 
+                  border: "1px solid var(--card-border)", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--text-bright)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  transition: "background-color 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
+              >
+                <RotateCcw size={16} />
+              </button>
+            </div>
+
+            <TransformComponent
+              wrapperStyle={{
+                width: "100%",
+                height: "100%",
+                overflow: "hidden"
+              }}
+              contentStyle={{
+                width: "100%"
+              }}
+            >
+              {/* SVG Programmatic Overlay */}
+              <svg 
+                viewBox="0 0 1000 562" 
+                preserveAspectRatio="xMidYMid meet"
+                style={{ 
+                  width: "100%", 
+                  aspectRatio: "1000 / 562",
+                  display: "block"
+                }}
+              >
+                {/* Dot Grid Pattern */}
+                <defs>
+                  <pattern id="dotGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="10" cy="10" r="0.75" fill="rgba(164,123,46,0.15)" />
+                  </pattern>
+                </defs>
+                <rect width="1000" height="562" fill="url(#dotGrid)" />
+
+                {/* Group wrapper containing all map elements */}
+                <g>
+                  {/* Dong Son Drum Watermark Background */}
+                  <image 
+                    href="/trong_dong.svg"
+                    x="200" 
+                    y="-19" 
+                    width="600" 
+                    height="600" 
+                    opacity="0.035"
+                    style={{
+                      pointerEvents: "none",
+                      filter: "invert(53%) sepia(35%) saturate(1067%) hue-rotate(354deg) brightness(94%) contrast(92%)"
+                    }}
+                  />
 
             {/* 2. Central concrete pathway */}
             <rect x="465" y="60" width="70" height="502" fill="#EADFCE" opacity="0.45" rx="4" />
@@ -613,9 +526,12 @@ export default function CemeteryMap({
                 </g>
               );
             })}
-          </g>
-        </svg>
-      </div>
+                </g>
+              </svg>
+            </TransformComponent>
+          </div>
+        )}
+      </TransformWrapper>
 
       {/* Floating Tooltip */}
       {hoveredMartyr && (

@@ -350,12 +350,35 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
                     <div
                       key={m.id}
                       className="quick-search-item"
-                      onClick={() => handleQuickSelect(m)}
+                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                      onClick={() => { handleOpenDetails(m); setIsQuickSearchFocused(false); }}
                     >
-                      <div className="quick-search-item-name">{m.name}</div>
-                      <div className="quick-search-item-meta">
-                        {m.cemetery} · Mộ {m.grave_no || "—"}, H{m.row_no || "—"}, Khu {getPhysicalZone(m)}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="quick-search-item-name">{m.name}</div>
+                        <div className="quick-search-item-meta">
+                          {m.cemetery} · Mộ {m.grave_no || "—"}, H{m.row_no || "—"}, Khu {getPhysicalZone(m)}
+                        </div>
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQuickSelect(m);
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          padding: "6px",
+                          color: "var(--gold)",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0
+                        }}
+                        title="Xem vị trí trên sơ đồ"
+                      >
+                        <Crosshair size={16} />
+                      </button>
                     </div>
                   ))
                 ) : (

@@ -476,7 +476,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
           <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" style={{ height: "54px", width: "54px", objectFit: "contain" }} />
         </div>
         <p style={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>
-          Cổng thông tin tri ân anh hùng liệt sĩ trên địa bàn huyện Tứ Kỳ
+          Cổng thông tin tri ân anh hùng liệt sĩ trên địa bàn xã Tứ Kỳ
         </p>
         <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", marginTop: "0.35rem" }}>
           Dự án số hóa cộng đồng phi lợi nhuận • Đoàn xã Tứ Kỳ & Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội • 2026

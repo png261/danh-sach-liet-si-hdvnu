@@ -1737,16 +1737,19 @@ body {
 
   /* ── Modal overlay: full screen on phone ── */
   .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
+    padding: 0 !important;
+    align-items: stretch !important;
   }
 
   .modal-content {
     max-width: 100% !important;
     width: 100% !important;
-    border-radius: 16px 16px 0 0 !important;
-    max-height: 92dvh !important;
-    max-height: 92vh !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
   }
 
   .modal-body {
@@ -2039,6 +2042,7 @@ body {
 }
 
 .app-header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2871,9 +2875,10 @@ body {
   color: var(--text-muted);
 }
 
-/* Mobile: smaller quick search */
-@media (max-width: 600px) {
+/* Mobile & Tablet: full-bleed quick search dropdown */
+@media (max-width: 768px) {
   .quick-search-wrapper {
+    position: static;
     min-width: 120px;
     max-width: 160px;
   }
@@ -2887,9 +2892,14 @@ body {
   }
 
   .quick-search-dropdown {
-    min-width: 250px;
-    right: auto;
-    left: -40px;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    top: 100% !important;
+    box-shadow: 0 8px 24px rgba(45, 39, 34, 0.15) !important;
   }
 }
 
@@ -3056,6 +3066,45 @@ body {
   }
   .header-right {
     gap: 0.35rem;
+  }
+}
+
+/* Mobile Search Bar Placement & Layout Refinement */
+@media (max-width: 768px) {
+  .app-header {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 0.6rem !important;
+    column-gap: 0.5rem !important;
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  .header-left {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+  }
+
+  .header-right {
+    display: contents !important;
+  }
+
+  .cem-dropdown {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: end !important;
+  }
+
+  .quick-search-wrapper {
+    grid-column: 1 / span 2 !important;
+    grid-row: 2 !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
   }
 }
 

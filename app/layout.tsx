@@ -20,21 +20,21 @@ const merriweather = Merriweather({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://danh-sach-liet-si-hdvnu.vercel.app"),
   title: {
-    default: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Huyện Tứ Kỳ",
+    default: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Xã Tứ Kỳ",
     template: "%s | Cổng Tra Cứu"
   },
-  description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.",
+  description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn xã Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.",
   openGraph: {
-    title: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Huyện Tứ Kỳ",
-    description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.",
-    siteName: "Nghĩa trang huyện Tứ Kỳ",
+    title: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Xã Tứ Kỳ",
+    description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn xã Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.",
+    siteName: "Nghĩa trang xã Tứ Kỳ",
     locale: "vi_VN",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Huyện Tứ Kỳ",
-    description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương.",
+    title: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Xã Tứ Kỳ",
+    description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn xã Tứ Kỳ, tỉnh Hải Dương.",
   },
 };
 
