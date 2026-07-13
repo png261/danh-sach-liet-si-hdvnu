@@ -3114,19 +3114,27 @@ body {
   color: var(--primary-red);
   line-height: 1;
 }
-
 @media (max-width: 640px) {
-  .loader-logo-text,
-  .loader-title,
-  .loader-status-text {
-    display: none !important;
+  .loader-logo-text {
+    font-size: 0.65rem;
+    text-align: left;
   }
   .loader-logo-img {
-    height: 50px;
-    width: 50px;
+    height: 38px;
+    width: 38px;
   }
   .loader-logos {
-    gap: 1.25rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .loader-title {
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+  .loader-spinner-wrapper {
+    margin-bottom: 1.5rem;
   }
 }
 

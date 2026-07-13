@@ -170,8 +170,9 @@ export default function CemeteryMap({
       const coords = getMartyrCoordinates(selectedMartyrId);
       if (coords) {
         const s = 3.5; // Zoom scale for grave focus
-        const lx = coords.x * (W / 1000);
-        const ly = coords.y * (W / 1000);
+        const scaleFactor = W / 1080;
+        const lx = (coords.x + 40) * scaleFactor;
+        const ly = (coords.y + 25) * scaleFactor;
         const tx = (W / 2) - (lx * s);
         // Đưa ngôi mộ lên góc trên màn hình (25% chiều cao) để tránh bị Bottom Card che mất
         const ty = (H / 4) - (ly * s);
@@ -296,11 +297,11 @@ export default function CemeteryMap({
             >
               {/* SVG Programmatic Overlay */}
               <svg 
-                viewBox="0 0 1000 562" 
+                viewBox="-40 -25 1080 612" 
                 preserveAspectRatio="xMidYMid meet"
                 style={{ 
                   width: "100%", 
-                  aspectRatio: "1000 / 562",
+                  aspectRatio: "1080 / 612",
                   display: "block"
                 }}
               >
@@ -310,7 +311,7 @@ export default function CemeteryMap({
                     <circle cx="10" cy="10" r="0.75" fill="rgba(164,123,46,0.15)" />
                   </pattern>
                 </defs>
-                <rect width="1000" height="562" fill="url(#dotGrid)" />
+                <rect x="-40" y="-25" width="1080" height="612" fill="url(#dotGrid)" />
 
                 {/* Group wrapper containing all map elements */}
                 <g>
