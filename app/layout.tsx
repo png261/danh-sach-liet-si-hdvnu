@@ -23,10 +23,10 @@ export const metadata: Metadata = {
     default: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Huyện Tứ Kỳ",
     template: "%s | Cổng Tra Cứu"
   },
-  description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện đồng hương Hải Dương tại Đại học Quốc gia Hà Nội.",
+  description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.",
   openGraph: {
     title: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Huyện Tứ Kỳ",
-    description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện đồng hương Hải Dương tại Đại học Quốc gia Hà Nội.",
+    description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.",
     siteName: "Nghĩa trang huyện Tứ Kỳ",
     locale: "vi_VN",
     type: "website",

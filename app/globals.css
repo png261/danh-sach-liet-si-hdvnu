@@ -2313,10 +2313,10 @@ body {
   }
 }
 
-/* Tablet / large phone (≤600px): hide badge text in header, keep logos */
-@media (max-width: 600px) {
+/* Tablet / mobile (≤768px): hide badge text in header, keep logos */
+@media (max-width: 768px) {
   .intro-badge-text {
-    display: none;
+    display: none !important;
   }
 
   .intro-header {
@@ -2955,8 +2955,10 @@ body {
 }
 
 @media (max-width: 640px) {
-  .loader-logo-text {
-    display: none;
+  .loader-logo-text,
+  .loader-title,
+  .loader-status-text {
+    display: none !important;
   }
   .loader-logo-img {
     height: 50px;
@@ -2965,13 +2967,6 @@ body {
   .loader-logos {
     gap: 1.25rem;
   }
-}
-
-.loader-divider {
-  width: 80px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  margin-bottom: 1rem;
 }
 
 .loader-title {

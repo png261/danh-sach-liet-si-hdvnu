@@ -12,19 +12,10 @@ import { LotusMotif, CloudDivider } from "@/app/components/VietnameseMotifs";
 import ProjectIntro from "@/app/components/ProjectIntro";
 import CemeteryDropdown from "@/app/components/CemeteryDropdown";
 import { createClient } from "@/utils/supabase/client";
-
-// Lazy-load heavy interactive components
-const CemeteryMap = dynamic(() => import("@/app/components/CemeteryMap"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "300px", color: "var(--text-muted)", fontSize: "0.9rem" }}>
-      Đang tải bản đồ thực địa...
-    </div>
-  ),
-});
-const MartyrModal = dynamic(() => import("@/app/components/MartyrModal"), { ssr: false });
-const CemeterySelectionModal = dynamic(() => import("@/app/components/CemeterySelectionModal"), { ssr: false });
-const BackgroundMusic = dynamic(() => import("@/app/components/BackgroundMusic"), { ssr: false });
+import MartyrModal from "@/app/components/MartyrModal";
+import CemeterySelectionModal from "@/app/components/CemeterySelectionModal";
+import BackgroundMusic from "@/app/components/BackgroundMusic";
+import CemeteryMap from "@/app/components/CemeteryMap";
 
 const SLUG_TO_CEMETERY: Record<string, string> = {
   "tu-ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
@@ -153,8 +144,6 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
               <span className="loader-logo-text">Đoàn xã Tứ Kỳ</span>
             </div>
           </div>
-          
-          <div className="loader-divider" />
           
           {/* Elegant serif title */}
           <h2 className="loader-title font-serif">

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cemeterySlug = resolvedParams.cemetery?.[0];
 
   let title = "Cổng Tra Cứu Phần Mộ Liệt Sĩ Huyện Tứ Kỳ";
-  let description = "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện đồng hương Hải Dương tại Đại học Quốc gia Hà Nội.";
+  let description = "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn huyện Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.";
   
   if (cemeterySlug) {
     const clean = cemeterySlug.toLowerCase();
