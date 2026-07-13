@@ -173,7 +173,8 @@ export default function CemeteryMap({
         const lx = coords.x * (W / 1000);
         const ly = coords.y * (W / 1000);
         const tx = (W / 2) - (lx * s);
-        const ty = (H / 2) - (ly * s);
+        // Đưa ngôi mộ lên góc trên màn hình (25% chiều cao) để tránh bị Bottom Card che mất
+        const ty = (H / 4) - (ly * s);
         
         transformRef.current.setTransform(tx, ty, s, 600); // 600ms smooth transition
       }

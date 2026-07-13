@@ -7,7 +7,7 @@ import { Search, RotateCcw, MapPin, Calendar, Map, Info, ChevronLeft, ChevronRig
 import Link from "next/link";
 
 import type { Martyr } from "@/app/types/martyr";
-import { normalizeString, getPhysicalZone, getAvailableZones, groupMartyrsByRow, computeZoneCounts } from "@/app/lib/martyrUtils";
+import { normalizeString, getPhysicalZone, getAvailableZones, groupMartyrsByRow, computeZoneCounts, isFuzzyNameMatch, getFuzzyScore } from "@/app/lib/martyrUtils";
 import { LotusMotif, CloudDivider } from "@/app/components/VietnameseMotifs";
 import ProjectIntro from "@/app/components/ProjectIntro";
 import CemeteryDropdown from "@/app/components/CemeteryDropdown";
@@ -16,6 +16,7 @@ import MartyrModal from "@/app/components/MartyrModal";
 import CemeterySelectionModal from "@/app/components/CemeterySelectionModal";
 import BackgroundMusic from "@/app/components/BackgroundMusic";
 import CemeteryMap from "@/app/components/CemeteryMap";
+import MartyrBottomCard from "@/app/components/MartyrBottomCard";
 
 const SLUG_TO_CEMETERY: Record<string, string> = {
   "tu-ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
@@ -57,8 +58,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
   const [selectedZone,     setSelectedZone]     = useState("");
 
   // ── UI state ─────────────────────────────────────────────────────────────────
-  const [selectedMartyr, setSelectedMartyr] = useState<Martyr | null>(null);
-  const [isModalOpen,    setIsModalOpen]    = useState(false);
+  const [selectedMartyr,    setSelectedMartyr]    = useState<Martyr | null>(null);
+  const [isModalOpen,       setIsModalOpen]       = useState(false);
+  const [isBottomCardOpen,  setIsBottomCardOpen]  = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFilterModalOpen,    setIsFilterModalOpen]    = useState(false);
   const [isCemeteryModalOpen,  setIsCemeteryModalOpen]  = useState(false);
@@ -76,22 +78,30 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
     [selectedCemetery]
   );
 
-  const filteredMartyrs = useMemo(() =>
-    martyrs.filter((m) =>
-      (!searchName       || normalizeString(m.name).includes(normalizeString(searchName))) &&
-      (!searchHometown   || normalizeString(m.hometown).includes(normalizeString(searchHometown))) &&
-      (!selectedZone     || getPhysicalZone(m) === selectedZone) &&
-      (!searchBirthYear  || m.birth_year?.includes(searchBirthYear))
-    ),
-    [martyrs, searchName, searchHometown, selectedZone, searchBirthYear]
-  );
+  const filteredMartyrs = useMemo(() => {
+    const results = martyrs.filter((m) =>
+      // Fuzzy match cho tên liệt sĩ: chịu sai dấu, sai thứ tự từ, sai chính tả nhẹ
+      (!searchName      || isFuzzyNameMatch(m.name, searchName)) &&
+      // Hometown vẫn dùng tìm kiếm chuỗi con đơn giản (địa danh ít khi bị gõ sai)
+      (!searchHometown  || normalizeString(m.hometown).includes(normalizeString(searchHometown))) &&
+      (!selectedZone    || getPhysicalZone(m) === selectedZone) &&
+      (!searchBirthYear || m.birth_year?.includes(searchBirthYear))
+    );
 
-  // Quick search suggestions (max 5)
+    // Sắp xếp theo độ liên quan: khớp chính xác hơn hiển thị trước
+    if (searchName) {
+      results.sort((a, b) => getFuzzyScore(b.name, searchName) - getFuzzyScore(a.name, searchName));
+    }
+
+    return results;
+  }, [martyrs, searchName, searchHometown, selectedZone, searchBirthYear]);
+
+  // Quick search suggestions (max 5) — dùng fuzzy search cho tên, sắp xếp theo độ liên quan
   const quickSearchSuggestions = useMemo(() => {
     if (!quickSearch || quickSearch.length < 2) return [];
-    const q = normalizeString(quickSearch);
     return martyrs
-      .filter(m => normalizeString(m.name).includes(q))
+      .filter(m => isFuzzyNameMatch(m.name, quickSearch))
+      .sort((a, b) => getFuzzyScore(b.name, quickSearch) - getFuzzyScore(a.name, quickSearch))
       .slice(0, 5);
   }, [quickSearch, martyrs]);
 
@@ -181,8 +191,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
     setSelectedCemetery(martyr.cemetery);
     setSelectedZone(getPhysicalZone(martyr));
     setSelectedMartyr(martyr);
-    setIsSidebarCollapsed(true); // Close search view to show map fullscreen
-    setTimeout(() => graveGridRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+    // Giữ Bottom Card mở để người dùng vẫn thấy thông tin ngôi mộ sau khi định vị
+    setIsBottomCardOpen(true);
+    setTimeout(() => graveGridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
   };
 
   const handleQuickSelect = useCallback((martyr: Martyr) => {
@@ -251,9 +262,22 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
     setSelectedCemetery(""); setSelectedZone("");
   };
 
+  /** Click liệt sĩ từ danh sách hoặc bản đồ → mở Bottom Card trước */
   const handleOpenDetails = (martyr: Martyr) => {
     setSelectedMartyr(martyr);
+    setIsBottomCardOpen(true);
+    setIsModalOpen(false); // đảm bảo modal đầy đủ không mở cùng lúc
+  };
+
+  /** Từ Bottom Card → mở modal tiểu sử đầy đủ */
+  const handleOpenFullModalFromCard = () => {
     setIsModalOpen(true);
+  };
+
+  /** Đóng Bottom Card và bỏ chọn liệt sĩ */
+  const handleCloseBottomCard = () => {
+    setIsBottomCardOpen(false);
+    setSelectedMartyr(null);
   };
 
   if (!selectedCemetery) {
@@ -419,11 +443,25 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
         </div>
       </main>
 
-      {/* ── Detail modal ───────────────────────────────────────────────────────── */}
+      {/* ── Bottom Preview Card ────────────────────────────────────────────────── */}
+      {isBottomCardOpen && selectedMartyr && !isModalOpen && (
+        <MartyrBottomCard
+          martyr={selectedMartyr}
+          onClose={handleCloseBottomCard}
+          onOpenFullModal={handleOpenFullModalFromCard}
+          onLocate={handleLocateMartyrGrave}
+        />
+      )}
+
+      {/* ── Detail modal (đầy đủ) ──────────────────────────────────────────────── */}
       {isModalOpen && selectedMartyr && (
         <MartyrModal
           martyr={selectedMartyr}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            // Khi đóng modal đầy đủ, giữ Bottom Card để người dùng không mất context
+            setIsBottomCardOpen(true);
+          }}
           onLocate={handleLocateMartyrGrave}
         />
       )}
