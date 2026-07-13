@@ -12,7 +12,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const audio = new Audio("/intro_bgm.mp3");
+    const audio = new Audio("https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/intro_bgm.mp3");
     audio.loop = true;
     audio.volume = 0;
     
@@ -105,7 +105,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
         }}
       >
         <video 
-          src="/intro_bg_video.mp4" 
+          src="https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/intro_bg_video.mp4" 
           autoPlay 
           loop 
           muted 

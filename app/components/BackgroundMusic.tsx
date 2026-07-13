@@ -6,7 +6,7 @@ export default function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = new Audio("/bg_music.mp3");
+    const audio = new Audio("https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3");
     audio.loop = true;
     audio.volume = 0.18;
     audioRef.current = audio;
