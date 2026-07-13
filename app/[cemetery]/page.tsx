@@ -1,25 +1,24 @@
 import type { Metadata } from "next";
-import CemeteryClient from "./CemeteryClient";
+import CemeteryClient from "../CemeteryClient";
 
 type Props = {
-  params: Promise<{ cemetery?: string[] }>;
+  params: Promise<{ cemetery: string }>;
 };
 
 // Define static parameters for static site generation
 export async function generateStaticParams() {
   return [
-    { cemetery: [] },
-    { cemetery: ["tu-ky"] },
-    { cemetery: ["minh-duc"] },
-    { cemetery: ["quang-khai"] },
-    { cemetery: ["quang-phuc"] },
+    { cemetery: "tu-ky" },
+    { cemetery: "minh-duc" },
+    { cemetery: "quang-khai" },
+    { cemetery: "quang-phuc" },
   ];
 }
 
 // Dynamically generate SEO metadata for each page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const cemeterySlug = resolvedParams.cemetery?.[0];
+  const cemeterySlug = resolvedParams.cemetery;
 
   let title = "Cổng Tra Cứu Phần Mộ Liệt Sĩ Xã Tứ Kỳ";
   let description = "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn xã Tứ Kỳ, tỉnh Hải Dương. Thực hiện bởi Đoàn xã Tứ Kỳ và Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội.";
@@ -61,6 +60,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const resolvedParams = await params;
-  const cemeterySlug = resolvedParams.cemetery?.[0];
+  const cemeterySlug = resolvedParams.cemetery;
   return <CemeteryClient initialCemeterySlug={cemeterySlug} />;
 }
