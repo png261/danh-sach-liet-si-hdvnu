@@ -148,9 +148,9 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
           className="modal-close"
           onClick={onClose}
           aria-label="Đóng cửa sổ tiểu sử"
-          style={{ color: "var(--text-muted)", zIndex: 10, top: "15px", right: "15px" }}
+          style={{ zIndex: 10 }}
         >
-          ✕
+          Đóng
         </button>
 
         {/* Header */}

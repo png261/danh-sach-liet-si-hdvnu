@@ -30,11 +30,20 @@ export const metadata: Metadata = {
     siteName: "Nghĩa trang xã Tứ Kỳ",
     locale: "vi_VN",
     type: "website",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Xã Tứ Kỳ",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Cổng Tra Cứu Phần Mộ Liệt Sĩ Xã Tứ Kỳ",
     description: "Cổng tra cứu thông tin phần mộ và tiểu sử Anh hùng Liệt sĩ tại các nghĩa trang liệt sĩ trên địa bàn xã Tứ Kỳ, tỉnh Hải Dương.",
+    images: ["/api/og"],
   },
 };
 

@@ -92,16 +92,18 @@ export default function CemeterySelectionModal({
 
         {/* Header */}
         <div className="cem-modal-header">
-          <div className="cem-modal-title-wrapper">
-            <h2 className="cem-modal-title font-serif">CHỌN NGHĨA TRANG LIỆT SĨ</h2>
+          <div className="cem-modal-header-content">
+            <div className="cem-modal-title-wrapper">
+              <h2 className="cem-modal-title font-serif">CHỌN NGHĨA TRANG LIỆT SĨ</h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="cem-modal-close-btn"
+              aria-label="Đóng cửa sổ"
+            >
+              <span className="cem-modal-close-text">Đóng</span>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="cem-modal-close-btn"
-            aria-label="Đóng cửa sổ"
-          >
-            <X size={20} />
-          </button>
         </div>
 
         {/* Cemetery Grid */}

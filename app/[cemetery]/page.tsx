@@ -49,11 +49,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       siteName: "Nghĩa trang xã Tứ Kỳ",
       locale: "vi_VN",
+      images: [
+        {
+          url: `/api/og?cemetery=${cemeterySlug}`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [`/api/og?cemetery=${cemeterySlug}`],
     },
   };
 }

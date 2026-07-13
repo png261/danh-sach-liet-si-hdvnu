@@ -98,7 +98,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
           top: 0, 
           left: 0, 
           width: "100%", 
-          height: "90vh", 
+          height: "100vh", 
           overflow: "hidden", 
           zIndex: 0,
           pointerEvents: "none"
@@ -131,7 +131,10 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
       <header 
         className="intro-header"
         style={{ 
-          position: "relative", 
+          position: "absolute", 
+          top: 0, 
+          left: 0, 
+          right: 0,
           zIndex: 10, 
           maxWidth: "1200px", 
           margin: "0 auto", 
@@ -183,12 +186,13 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
           zIndex: 10, 
           maxWidth: "1000px", 
           margin: "0 auto", 
-          padding: "4rem 1.25rem 4rem", 
+          padding: "6rem 1.25rem 4rem", 
           textAlign: "center",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          minHeight: "100vh"
         }}
       >
 

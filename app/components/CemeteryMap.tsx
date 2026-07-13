@@ -2,7 +2,6 @@
 /* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars */
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone, groupMartyrsByRow } from "@/app/lib/martyrUtils";
@@ -214,8 +213,8 @@ export default function CemeteryMap({
                 onClick={() => zoomIn()} 
                 title="Phóng to bản đồ"
                 style={{ 
-                  width: "40px", 
-                  height: "40px", 
+                  height: "36px", 
+                  padding: "0 12px",
                   borderRadius: "8px", 
                   backgroundColor: "#FFFFFF", 
                   border: "1px solid var(--card-border)", 
@@ -224,20 +223,22 @@ export default function CemeteryMap({
                   justifyContent: "center",
                   cursor: "pointer",
                   color: "var(--text-bright)",
+                  fontWeight: "500",
+                  fontSize: "13px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   transition: "background-color 0.2s"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
               >
-                <ZoomIn size={20} />
+                Phóng to
               </button>
               <button 
                 onClick={() => zoomOut()} 
                 title="Thu nhỏ bản đồ"
                 style={{ 
-                  width: "40px", 
-                  height: "40px", 
+                  height: "36px", 
+                  padding: "0 12px",
                   borderRadius: "8px", 
                   backgroundColor: "#FFFFFF", 
                   border: "1px solid var(--card-border)", 
@@ -246,20 +247,22 @@ export default function CemeteryMap({
                   justifyContent: "center",
                   cursor: "pointer",
                   color: "var(--text-bright)",
+                  fontWeight: "500",
+                  fontSize: "13px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   transition: "background-color 0.2s"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
               >
-                <ZoomOut size={20} />
+                Thu nhỏ
               </button>
               <button 
                 onClick={() => resetTransform()} 
                 title="Đặt lại bản đồ về mặc định"
                 style={{ 
-                  width: "40px", 
-                  height: "40px", 
+                  height: "36px", 
+                  padding: "0 12px",
                   borderRadius: "8px", 
                   backgroundColor: "#FFFFFF", 
                   border: "1px solid var(--card-border)", 
@@ -268,13 +271,15 @@ export default function CemeteryMap({
                   justifyContent: "center",
                   cursor: "pointer",
                   color: "var(--text-bright)",
+                  fontWeight: "500",
+                  fontSize: "13px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   transition: "background-color 0.2s"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
               >
-                <RotateCcw size={16} />
+                Đặt lại
               </button>
             </div>
 

@@ -338,9 +338,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
               <button
                 className="quick-search-filter-btn"
                 onClick={() => setIsFilterModalOpen(true)}
-                title="Bộ lọc nâng cao"
+                title="Tìm kiếm nâng cao"
               >
-                <Filter size={14} />
+                Tìm nâng cao
               </button>
             </div>
             {isQuickSearchFocused && quickSearch.length >= 2 && (
@@ -470,12 +470,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
                 <Filter size={18} style={{ color: "var(--gold)" }} />
                 <h3 style={{ margin: 0, fontSize: "1.15rem", fontFamily: "var(--font-serif)", color: "var(--text-bright)" }}>Tìm kiếm & Lọc liệt sĩ</h3>
               </div>
-              <button 
-                onClick={() => setIsFilterModalOpen(false)}
-                style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "4px" }}
-              >
-                <X size={20} />
-              </button>
+
             </div>
 
             {/* Content (Body - Scrollable) */}
@@ -639,7 +634,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
                 <RotateCcw size={14} /> Xóa bộ lọc
               </button>
               <button
-                className="btn btn-gold"
+                className="btn btn-primary"
                 onClick={() => setIsFilterModalOpen(false)}
                 style={{ padding: "0.6rem 1.25rem", fontSize: "0.85rem", fontWeight: "600", color: "#FFFFFF", borderRadius: "6px" }}
               >
