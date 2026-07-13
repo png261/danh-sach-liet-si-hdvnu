@@ -147,11 +147,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
           <div className="loader-logos">
             <div className="loader-logo-item">
               <img src="/logo_svtn.webp" alt="Logo Đội SVTN Hải Dương" className="loader-logo-img" />
-              <span className="loader-logo-text">Đội SVTN Hải Dương tại ĐHQG Hà Nội</span>
             </div>
             <div className="loader-logo-item">
               <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" className="loader-logo-img" />
-              <span className="loader-logo-text">Đoàn xã Tứ Kỳ</span>
             </div>
           </div>
           

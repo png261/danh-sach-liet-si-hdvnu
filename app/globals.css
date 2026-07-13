@@ -3115,26 +3115,24 @@ body {
   line-height: 1;
 }
 @media (max-width: 640px) {
-  .loader-logo-text {
-    font-size: 0.65rem;
-    text-align: left;
-  }
   .loader-logo-img {
-    height: 38px;
-    width: 38px;
+    height: 46px;
+    width: 46px;
   }
   .loader-logos {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
+    flex-direction: row !important;
+    gap: 1.25rem !important;
+    justify-content: center !important;
+    margin-bottom: 1.5rem !important;
   }
   .loader-title {
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
+    margin-bottom: 1.5rem !important;
   }
   .loader-spinner-wrapper {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem !important;
   }
 }
 
