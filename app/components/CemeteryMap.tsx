@@ -190,9 +190,9 @@ export default function CemeteryMap({
         ref={transformRef}
         key={`${selectedCemetery}-${isMobile}`}
         initialScale={isMobile ? 2.5 : 1}
-        minScale={1}
-        maxScale={4}
-        limitToBounds={!isMobile}
+        minScale={isMobile ? 1.2 : 0.8}
+        maxScale={isMobile ? 5 : 4}
+        limitToBounds={true}
         centerOnInit={true}
         centerZoomedOut={true}
       >
