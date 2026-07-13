@@ -2327,6 +2327,18 @@ body {
 }
 
 /* ── Intro page responsive ── */
+.intro-logo-img {
+  height: 60px !important;
+  width: 60px !important;
+  transition: transform 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .intro-logo-img {
+    height: 48px !important;
+    width: 48px !important;
+  }
+}
 
 /* Desktop: give hero more vertical room */
 @media (min-width: 768px) {

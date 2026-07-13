@@ -229,14 +229,14 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
             onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
           >
-            <img src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" style={{ height: "38px", width: "38px", objectFit: "contain", flexShrink: 0 }} />
+            <img src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" className="intro-logo-img" style={{ height: "60px", width: "60px", objectFit: "contain", flexShrink: 0 }} />
             <div className="intro-badge-text" style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
               <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--primary-red)", letterSpacing: "0.02em", lineHeight: "1.2" }}>Đội Sinh viên tình nguyện Hải Dương</span>
               <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--primary-red)", letterSpacing: "0.02em", lineHeight: "1.2" }}>tại Đại học Quốc gia Hà Nội</span>
             </div>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-            <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã" style={{ height: "38px", width: "38px", objectFit: "contain", flexShrink: 0 }} />
+            <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã" className="intro-logo-img" style={{ height: "60px", width: "60px", objectFit: "contain", flexShrink: 0 }} />
             <span className="intro-badge-text" style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--primary-red)", letterSpacing: "0.02em" }}>Đoàn Xã Tứ Kỳ</span>
           </div>
         </div>
@@ -250,7 +250,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
           zIndex: 10, 
           maxWidth: "1000px", 
           margin: "0 auto", 
-          padding: "6rem 1.25rem 4rem", 
+          padding: "8.5rem 1.25rem 4rem", 
           textAlign: "center",
           display: "flex",
           flexDirection: "column",
