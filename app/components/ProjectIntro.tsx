@@ -263,7 +263,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
         <h1 
           className="font-serif animate-fade-rise"
           style={{ 
-            fontSize: "clamp(2rem, 7vw, 4.5rem)", 
+            fontSize: "clamp(1.6rem, 6vw, 3.8rem)", 
             lineHeight: "1.1", 
             letterSpacing: "-1px", 
             color: "var(--foreground)", 
@@ -278,7 +278,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
         <p 
           className="animate-fade-rise-delay-1"
           style={{ 
-            fontSize: "clamp(0.95rem, 2vw, 1.12rem)", 
+            fontSize: "clamp(0.85rem, 1.8vw, 1.05rem)", 
             color: "var(--text-muted)", 
             maxWidth: "680px", 
             marginTop: "1.8rem", 
@@ -378,7 +378,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
           <h2 
             className="font-serif"
             style={{ 
-              fontSize: "clamp(1.8rem, 4vw, 2.8rem)", 
+              fontSize: "clamp(1.4rem, 3.5vw, 2.4rem)", 
               fontWeight: "normal", 
               color: "var(--foreground)", 
               marginTop: "0.5rem",

@@ -3100,8 +3100,8 @@ body {
 }
 
 .loader-logo-img {
-  height: 40px;
-  width: 40px;
+  height: 85px;
+  width: 85px;
   object-fit: contain;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
   transition: transform 0.3s ease;
@@ -3116,8 +3116,8 @@ body {
 }
 @media (max-width: 640px) {
   .loader-logo-img {
-    height: 46px;
-    width: 46px;
+    height: 64px;
+    width: 64px;
   }
   .loader-logos {
     flex-direction: row !important;
