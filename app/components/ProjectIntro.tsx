@@ -286,7 +286,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             fontWeight: "300"
           }}
         >
-          Công trình thanh niên số hóa bản đồ các nghĩa trang liệt sĩ tại huyện Tứ Kỳ (bao gồm các xã Tứ Kỳ, Minh Đức, Quang Khải và Quang Phục) thực hiện bởi Đội sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội phối hợp cùng Đoàn xã Tứ Kỳ. Nơi tri ân công ơn trời biển, lưu giữ ngàn năm ký ức về các anh hùng liệt sĩ.
+          Công trình thanh niên số hóa bản đồ các nghĩa trang liệt sĩ tại xã Tứ Kỳ (bao gồm các xã Tứ Kỳ, Minh Đức, Quang Khải và Quang Phục) thực hiện bởi Đội sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội phối hợp cùng Đoàn xã Tứ Kỳ. Nơi tri ân công ơn trời biển, lưu giữ ngàn năm ký ức về các anh hùng liệt sĩ.
         </p>
 
         {/* Action Buttons */}
