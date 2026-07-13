@@ -3514,7 +3514,6 @@ body {
   background: rgba(35, 30, 26, 0.7) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  z-index: 99999 !important;
   padding: 1.5rem !important;
   display: flex !important;
   align-items: center !important;

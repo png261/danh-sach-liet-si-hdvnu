@@ -200,7 +200,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
           top: 0, 
           left: 0, 
           right: 0,
-          zIndex: 10, 
+          zIndex: 1, 
           maxWidth: "1200px", 
           margin: "0 auto", 
           padding: "1.25rem 1.25rem", 
