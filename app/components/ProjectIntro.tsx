@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { ArrowRight, Play, Heart, Users, Calendar, CheckCircle, Award, MapPin, Database, QrCode, Flame, Flag } from "lucide-react";
+import { ArrowRight, Play, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const FacebookIcon = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
@@ -20,129 +20,34 @@ interface ProjectIntroProps {
   onEnterSearch: () => void;
 }
 
-interface DayActivity {
-  day: number;
+interface GalleryImage {
+  src: string;
+  alt: string;
   title: string;
-  subtitle: string;
-  image: string;
-  imageAlt: string;
-  icon: React.ReactNode;
-  tasks: string[];
-  highlight?: string;
-  isProjectDay?: boolean;
 }
 
-const days: DayActivity[] = [
-  {
-    day: 1,
-    title: "Lễ Ra Quân & Hành Quân",
-    subtitle: "Xuất kích về xã Tứ Kỳ",
-    image: "/real_tu_ky.webp",
-    imageAlt: "Quang cảnh xã Tứ Kỳ, huyện Tứ Kỳ, tỉnh Hải Dương",
-    icon: <Flag size={16} />,
-    tasks: [
-      "Tập hợp toàn đội hình tại Hà Nội, di chuyển về địa bàn xã Tứ Kỳ",
-      "Tổ chức lễ ra quân chiến dịch Mùa hè xanh 2026",
-      "Họp bàn giao nhiệm vụ với lãnh đạo Đoàn xã Tứ Kỳ",
-      "Phân chia khu vực đóng quân và thống nhất lịch công tác 7 ngày",
-    ],
-  },
-  {
-    day: 2,
-    title: "Khảo Sát Thực Địa",
-    subtitle: "Thu thập dữ liệu gốc",
-    image: "/real_quang_khai.webp",
-    imageAlt: "Nghĩa trang liệt sĩ xã Quang Khải, huyện Tứ Kỳ",
-    icon: <MapPin size={16} />,
-    tasks: [
-      "Ra quân tại cả 4 nghĩa trang: Tứ Kỳ, Minh Đức, Quang Khải, Quang Phục",
-      "Định vị GPS và chụp ảnh sơ đồ tổng thể khuôn viên từng nghĩa trang",
-      "Ghi chép thủ công thông tin chi tiết từ tất cả bia mộ liệt sĩ",
-      "Đối chiếu với sổ danh bạ liệt sĩ tại Văn phòng UBND xã Tứ Kỳ",
-    ],
-  },
-  {
-    day: 3,
-    title: "Chỉnh Trang Nghĩa Trang",
-    subtitle: "Tri ân bằng hành động",
-    image: "/activity_don_dep.webp",
-    imageAlt: "Đội sinh viên tình nguyện dọn dẹp, chỉnh trang nghĩa trang liệt sĩ",
-    icon: <Heart size={16} />,
-    tasks: [
-      "Quét dọn lá khô, nhổ cỏ hoang trên toàn bộ khuôn viên nghĩa trang",
-      "Lau sạch hàng trăm bia mộ liệt sĩ, bổ sung thông tin còn thiếu",
-      "Sơn sửa, chỉnh trang hàng rào và lối đi trong nghĩa trang",
-      "Chuẩn bị không gian trang nghiêm, sạch đẹp cho Lễ dâng hương",
-    ],
-  },
-  {
-    day: 4,
-    title: "Xây Dựng Bản Đồ Số",
-    subtitle: "Số hóa dữ liệu liệt sĩ",
-    image: "/grave_illustration.webp",
-    imageAlt: "Sơ đồ bản đồ nghĩa trang liệt sĩ được số hóa",
-    icon: <Database size={16} />,
-    tasks: [
-      "Thiết kế cấu trúc cơ sở dữ liệu tên, năm sinh, quê quán liệt sĩ",
-      "Vẽ và số hóa sơ đồ vị trí các phần mộ trong từng nghĩa trang",
-      "Tích hợp tọa độ bản đồ và phát triển giao diện tra cứu bản đồ tương tác",
-      "Nhập liệu kiểm tra chéo hơn 1.000 hồ sơ thông tin liệt sĩ",
-    ],
-    highlight: "Ngày cốt lõi của dự án — Công trình thanh niên Website tra cứu liệt sĩ được xây dựng trực tiếp từ dữ liệu này.",
-    isProjectDay: true,
-  },
-  {
-    day: 5,
-    title: "Lắp Đặt Bảng Mã QR",
-    subtitle: "Chuyển đổi số cộng đồng",
-    image: "/activity_dung_qr.webp",
-    imageAlt: "Lắp đặt bảng tra cứu mã QR tại cổng nghĩa trang liệt sĩ",
-    icon: <QrCode size={16} />,
-    tasks: [
-      "Thiết kế và chế tác bảng gỗ lắp mã QR kích thước lớn",
-      "Lắp đặt bảng QR tại cổng chính các nghĩa trang Tứ Kỳ, Quang Khải, Quang Phục",
-      "Hướng dẫn người dân quét mã QR và tra cứu thông tin trực tiếp bằng điện thoại",
-      "Kiểm tra kết nối, tốc độ tra cứu và tính ổn định của hệ thống ngoài thực địa",
-    ],
-    highlight: "Người dân và thân nhân liệt sĩ có thể ngay lập tức tìm mộ bằng điện thoại thông minh.",
-    isProjectDay: true,
-  },
-  {
-    day: 6,
-    title: "Lễ Dâng Hương & Thắp Nến",
-    subtitle: "Đêm tri ân ấm cúng",
-    image: "/activity_doan_vien.webp",
-    imageAlt: "Lễ dâng hương và thắp nến tri ân các anh hùng liệt sĩ",
-    icon: <Flame size={16} />,
-    tasks: [
-      "Tổ chức lễ dâng hương trang trọng trước đài tưởng niệm liệt sĩ xã Tứ Kỳ",
-      "Thắp nến tri ân lên từng ngôi mộ liệt sĩ trong đêm khuya tĩnh lặng",
-      "Mời các cụ cựu chiến binh và gia đình liệt sĩ cùng tham dự lễ",
-      "Giao lưu văn nghệ và chia sẻ câu chuyện về những người đã hi sinh",
-    ],
-  },
-  {
-    day: 7,
-    title: "Bàn Giao Công Trình Thanh Niên",
-    subtitle: "Kết thúc chiến dịch Mùa hè xanh",
-    image: "/real_quang_phuc.webp",
-    imageAlt: "Nghĩa trang liệt sĩ xã Quang Phục sau khi hoàn thành chiến dịch",
-    icon: <Award size={16} />,
-    tasks: [
-      "Tổ chức lễ bàn giao chính thức Cổng tra cứu thông tin liệt sĩ cho UBND xã Tứ Kỳ",
-      "Nghiệm thu Công trình thanh niên cùng Huyện đoàn Tứ Kỳ và Đoàn xã",
-      "Tổng kết kết quả 7 ngày chiến dịch Mùa hè xanh 2026",
-      "Tạm biệt bà con nhân dân và kết thúc hành trình ý nghĩa tại quê hương",
-    ],
-    highlight: "Website tra cứu liệt sĩ được bàn giao chính thức — Công trình thanh niên số hóa phi lợi nhuận phục vụ cộng đồng mãi mãi.",
-    isProjectDay: true,
-  },
+const galleryImages: GalleryImage[] = [
+  { src: "/real_tu_ky.webp", alt: "Lễ Ra Quân & Hành Quân - Ngày 1", title: "Ngày 1: Lễ Ra Quân & Hành Quân" },
+  { src: "/real_quang_khai.webp", alt: "Khảo Sát Thực Địa - Ngày 2", title: "Ngày 2: Khảo Sát Thực Địa" },
+  { src: "/activity_don_dep.webp", alt: "Chỉnh Trang Nghĩa Trang - Ngày 3", title: "Ngày 3: Chỉnh Trang Nghĩa Trang" },
+  { src: "/grave_illustration.webp", alt: "Xây Dựng Bản Đồ Số - Ngày 4", title: "Ngày 4: Xây Dựng Bản Đồ Số" },
+  { src: "/activity_dung_qr.webp", alt: "Lắp Đặt Bảng Mã QR - Ngày 5", title: "Ngày 5: Lắp Đặt Bảng Mã QR" },
+  { src: "/activity_doan_vien.webp", alt: "Lễ Dâng Hương & Thắp Nến - Ngày 6", title: "Ngày 6: Lễ Dâng Hương & Thắp Nến" },
+  { src: "/real_quang_phuc.webp", alt: "Bàn Giao Công Trình - Ngày 7", title: "Ngày 7: Bàn Giao Công Trình" },
+  { src: "/real_minh_duc.webp", alt: "Nghĩa trang liệt sĩ xã Minh Đức", title: "Nghĩa trang liệt sĩ xã Minh Đức" },
+  { src: "/monument_tu_ky.webp", alt: "Đài tưởng niệm nghĩa trang liệt sĩ Tứ Kỳ", title: "Đài tưởng niệm Tứ Kỳ" },
+  { src: "/monument_quang_khai.webp", alt: "Đài tưởng niệm nghĩa trang liệt sĩ Quang Khải", title: "Đài tưởng niệm Quang Khải" },
+  { src: "/monument_quang_phuc.webp", alt: "Đài tưởng niệm nghĩa trang liệt sĩ Quang Phục", title: "Đài tưởng niệm Quang Phục" },
+  { src: "/monument_minh_duc.webp", alt: "Đài tưởng niệm nghĩa trang liệt sĩ Minh Đức", title: "Đài tưởng niệm Minh Đức" },
+  { src: "/pavilion_tu_ky.webp", alt: "Khuôn viên nghĩa trang Tứ Kỳ", title: "Khuôn viên nghĩa trang Tứ Kỳ" },
+  { src: "/gate_cemetery.webp", alt: "Cổng nghĩa trang Tứ Kỳ", title: "Cổng nghĩa trang Tứ Kỳ" },
+  { src: "/gate_quang_khai.webp", alt: "Cổng nghĩa trang Quang Khải", title: "Cổng nghĩa trang Quang Khải" },
+  { src: "/gate_quang_phuc.webp", alt: "Cổng nghĩa trang Quang Phục", title: "Cổng nghĩa trang Quang Phục" },
 ];
 
 export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
-  const [activeDay, setActiveDay] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const audio = new Audio("https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/intro_bgm.mp3");
@@ -207,21 +112,39 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedImageIndex === null) return;
+      if (e.key === "Escape") setSelectedImageIndex(null);
+      if (e.key === "ArrowLeft") {
+        setSelectedImageIndex(prev => prev !== null ? (prev - 1 + galleryImages.length) % galleryImages.length : null);
+      }
+      if (e.key === "ArrowRight") {
+        setSelectedImageIndex(prev => prev !== null ? (prev + 1) % galleryImages.length : null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImageIndex]);
+
   const scrollToGallery = (e: React.MouseEvent) => {
     e.preventDefault();
     galleryRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleDayChange = (day: number) => {
-    if (day === activeDay) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setActiveDay(day);
-      setIsTransitioning(false);
-    }, 200);
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedImageIndex !== null) {
+      setSelectedImageIndex((selectedImageIndex - 1 + galleryImages.length) % galleryImages.length);
+    }
   };
 
-  const currentDay = days.find(d => d.day === activeDay)!;
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedImageIndex !== null) {
+      setSelectedImageIndex((selectedImageIndex + 1) % galleryImages.length);
+    }
+  };
 
   return (
     <div 
@@ -437,7 +360,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
         }}
       >
         {/* Section Header */}
-        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <span 
             style={{ 
               fontSize: "0.75rem", 
@@ -462,272 +385,236 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
               lineHeight: "1.2"
             }}
           >
-            7 ngày hành trình ý nghĩa
+            Hình ảnh hành trình hoạt động
           </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginTop: "0.6rem", maxWidth: "560px", margin: "0.6rem auto 0" }}>
-            Hành trình 7 ngày chiến dịch Mùa hè xanh tại xã Tứ Kỳ — từ khảo sát thực địa đến bàn giao Công trình thanh niên số hóa.
-          </p>
         </div>
 
-        {/* Day Selector Tabs */}
-        <div 
-          className="day-tabs-scroll"
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            overflowX: "auto",
-            paddingBottom: "1rem",
-            scrollbarWidth: "none",
-            marginBottom: "2rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          {days.map((d) => (
-            <button
-              key={d.day}
-              onClick={() => handleDayChange(d.day)}
-              className={`day-tab-btn${activeDay === d.day ? " active" : ""}${d.isProjectDay ? " project-day" : ""}`}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.25rem",
-                padding: "0.6rem 1rem",
-                borderRadius: "14px",
-                border: activeDay === d.day 
-                  ? `2px solid ${d.isProjectDay ? "var(--gold)" : "var(--primary-red)"}`
-                  : "2px solid transparent",
-                background: activeDay === d.day 
-                  ? (d.isProjectDay 
-                      ? "linear-gradient(135deg, rgba(164,123,46,0.15), rgba(164,123,46,0.05))"
-                      : "linear-gradient(135deg, rgba(155,28,38,0.10), rgba(155,28,38,0.03))")
-                  : "rgba(255,255,255,0.6)",
-                cursor: "pointer",
-                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-                backdropFilter: "blur(8px)",
-                minWidth: "80px",
-                flexShrink: 0,
-                boxShadow: activeDay === d.day ? "0 4px 14px rgba(0,0,0,0.08)" : "none",
-              }}
-              aria-label={`Ngày ${d.day}: ${d.title}`}
-            >
-              <span style={{ 
-                fontSize: "0.65rem", 
-                fontWeight: 700, 
-                color: activeDay === d.day 
-                  ? (d.isProjectDay ? "var(--gold)" : "var(--primary-red)")
-                  : "var(--text-muted)",
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-                transition: "color 0.2s"
-              }}>
-                Ngày {d.day}
-              </span>
-              <span style={{ 
-                display: "flex",
-                color: activeDay === d.day 
-                  ? (d.isProjectDay ? "var(--gold)" : "var(--primary-red)")
-                  : "#9CA3AF",
-                transition: "color 0.2s"
-              }}>
-                {d.icon}
-              </span>
-              {d.isProjectDay && (
-                <span style={{
-                  width: "5px",
-                  height: "5px",
-                  borderRadius: "50%",
-                  background: "var(--gold)",
-                  flexShrink: 0,
-                }} />
-              )}
-            </button>
-          ))}
-        </div>
+        {/* Scrollable Gallery */}
+        <div style={{ position: "relative" }}>
+          {/* Subtle scroll/swipe indicator */}
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            alignItems: "center",
+            marginBottom: "0.75rem", 
+            fontSize: "0.8rem", 
+            color: "var(--text-muted)",
+            padding: "0 0.25rem"
+          }}>
+            <span>Lướt qua trái/phải để xem ({galleryImages.length} ảnh)</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
+              Lướt xem <ArrowRight size={12} />
+            </span>
+          </div>
 
-        {/* Day Detail Card */}
-        <div
-          className="day-detail-card"
-          style={{
-            opacity: isTransitioning ? 0 : 1,
-            transform: isTransitioning ? "translateY(8px)" : "translateY(0)",
-            transition: "opacity 0.2s ease, transform 0.2s ease",
-            background: "#FFFFFF",
-            borderRadius: "24px",
-            border: currentDay.isProjectDay ? "1.5px solid var(--gold)" : "1.5px solid #EADFCE",
-            overflow: "hidden",
-            boxShadow: currentDay.isProjectDay 
-              ? "0 8px 40px rgba(164, 123, 46, 0.12), 0 2px 8px rgba(0,0,0,0.04)"
-              : "0 8px 40px rgba(0,0,0,0.05)",
-          }}
-        >
-          <div
-            className="day-detail-inner"
+          <div 
+            className="gallery-scroll-container"
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              height: "420px",
+              display: "flex",
+              gap: "1rem",
+              overflowX: "auto",
+              paddingBottom: "1.5rem",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+              scrollSnapType: "x mandatory",
             }}
           >
-            {/* Left: Image */}
-            <div style={{ position: "relative", overflow: "hidden", height: "420px" }}>
-              <img
-                src={currentDay.image}
-                alt={currentDay.imageAlt}
+            {galleryImages.map((img, index) => (
+              <div
+                key={index}
+                onClick={() => setSelectedImageIndex(index)}
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
-                  display: "block",
+                  flex: "0 0 auto",
+                  width: "min(360px, 80vw)",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  position: "relative",
+                  backgroundColor: "#FFF",
+                  border: "1px solid #EADFCE",
+                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.03)",
+                  transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                  scrollSnapAlign: "start",
+                  aspectRatio: "1.5",
                 }}
-                className="day-detail-img"
-              />
-              {/* Day badge overlay */}
-              <div style={{
-                position: "absolute",
-                top: "1.25rem",
-                left: "1.25rem",
-                background: currentDay.isProjectDay 
-                  ? "linear-gradient(135deg, var(--gold), #C59C45)" 
-                  : "linear-gradient(135deg, var(--primary-red), #7B1020)",
-                color: "#FFF",
-                borderRadius: "12px",
-                padding: "0.4rem 0.85rem",
-                fontSize: "0.7rem",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.35rem",
-              }}>
-                {currentDay.icon}
-                Ngày {currentDay.day}
-              </div>
-            </div>
-
-            {/* Right: Content */}
-            <div style={{ 
-              padding: "2.5rem", 
-              display: "flex", 
-              flexDirection: "column",
-              justifyContent: "space-between",
-              height: "420px",
-              overflowY: "auto",
-            }}>
-              <div>
-                <div style={{
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  color: currentDay.isProjectDay ? "var(--gold)" : "var(--primary-red)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: "0.4rem",
-                }}>
-                  {currentDay.subtitle}
-                </div>
-                <h3 
-                  className="font-serif" 
-                  style={{ 
-                    fontSize: "clamp(1.2rem, 2.5vw, 1.7rem)", 
-                    color: "var(--foreground)", 
-                    marginBottom: "1.5rem",
-                    lineHeight: "1.25",
-                    fontWeight: "normal",
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow = "0 10px 25px rgba(164, 123, 46, 0.12)";
+                  const imageEl = e.currentTarget.querySelector("img");
+                  if (imageEl) imageEl.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "none";
+                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.03)";
+                  const imageEl = e.currentTarget.querySelector("img");
+                  if (imageEl) imageEl.style.transform = "scale(1)";
+                }}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+                    display: "block",
                   }}
-                >
-                  {currentDay.title}
-                </h3>
-
-                {/* Task List */}
-                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  {currentDay.tasks.map((task, i) => (
-                    <li key={i} style={{ 
-                      display: "flex", 
-                      gap: "0.7rem", 
-                      alignItems: "flex-start",
-                      fontSize: "0.85rem",
-                      color: "var(--text-muted)",
-                      lineHeight: "1.55",
-                    }}>
-                      <CheckCircle 
-                        size={15} 
-                        style={{ 
-                          color: currentDay.isProjectDay ? "var(--gold)" : "var(--primary-red)",
-                          flexShrink: 0, 
-                          marginTop: "2px" 
-                        }} 
-                        fill={currentDay.isProjectDay ? "rgba(164,123,46,0.12)" : "rgba(155,28,38,0.10)"}
-                      />
-                      <span>{task}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Project Highlight */}
-              {currentDay.highlight && (
+                />
                 <div style={{
-                  marginTop: "1.5rem",
-                  padding: "1rem 1.2rem",
-                  background: currentDay.isProjectDay 
-                    ? "linear-gradient(135deg, rgba(164,123,46,0.1), rgba(164,123,46,0.04))" 
-                    : "linear-gradient(135deg, rgba(155,28,38,0.07), rgba(155,28,38,0.02))",
-                  borderRadius: "12px",
-                  border: currentDay.isProjectDay ? "1px solid rgba(164,123,46,0.25)" : "1px solid rgba(155,28,38,0.15)",
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: "linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%)",
+                  padding: "1.2rem 1rem 0.8rem",
+                  color: "#FFF",
                   display: "flex",
-                  gap: "0.6rem",
-                  alignItems: "flex-start",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
                 }}>
-                  <Award 
-                    size={15} 
-                    style={{ 
-                      color: currentDay.isProjectDay ? "var(--gold)" : "var(--primary-red)",
-                      flexShrink: 0,
-                      marginTop: "1px"
-                    }} 
-                  />
-                  <p style={{ 
-                    fontSize: "0.8rem", 
-                    color: currentDay.isProjectDay ? "var(--gold)" : "var(--primary-red)",
-                    lineHeight: "1.55",
-                    margin: 0,
-                    fontWeight: 600,
+                  <span style={{ 
+                    fontSize: "0.85rem", 
+                    fontWeight: 600, 
+                    textShadow: "0 1px 2px rgba(0,0,0,0.6)",
+                    letterSpacing: "0.01em"
                   }}>
-                    {currentDay.highlight}
-                  </p>
+                    {img.title}
+                  </span>
                 </div>
-              )}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Day dots nav */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1.5rem" }}>
-          {days.map(d => (
-            <button
-              key={d.day}
-              onClick={() => handleDayChange(d.day)}
-              aria-label={`Chuyển sang Ngày ${d.day}`}
+      {/* Lightbox Modal */}
+      {selectedImageIndex !== null && (
+        <div
+          onClick={() => setSelectedImageIndex(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(8px)",
+            padding: "1rem",
+            animation: "fade-in 0.25s ease-out",
+          }}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setSelectedImageIndex(null)}
+            style={{
+              position: "absolute",
+              top: "1.5rem",
+              right: "1.5rem",
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "none",
+              borderRadius: "50%",
+              width: "44px",
+              height: "44px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#FFF",
+              cursor: "pointer",
+              transition: "background 0.2s",
+              zIndex: 10001,
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"}
+            aria-label="Đóng"
+          >
+            <X size={20} />
+          </button>
+
+          {/* Prev button */}
+          <button
+            onClick={handlePrevImage}
+            style={{
+              position: "absolute",
+              left: "1.5rem",
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "none",
+              borderRadius: "50%",
+              width: "50px",
+              height: "50px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#FFF",
+              cursor: "pointer",
+              transition: "background 0.2s",
+              zIndex: 10000,
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"}
+            aria-label="Ảnh trước"
+          >
+            <ChevronLeft size={24} />
+          </button>
+
+          {/* Image content */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              maxWidth: "90%",
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
+            <img
+              src={galleryImages[selectedImageIndex].src}
+              alt={galleryImages[selectedImageIndex].alt}
               style={{
-                width: activeDay === d.day ? "24px" : "8px",
-                height: "8px",
-                borderRadius: "4px",
-                background: activeDay === d.day 
-                  ? (d.isProjectDay ? "var(--gold)" : "var(--primary-red)")
-                  : "#D1C8BA",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                padding: 0,
+                maxWidth: "100%",
+                maxHeight: "75vh",
+                objectFit: "contain",
+                borderRadius: "12px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
               }}
             />
-          ))}
+            <div style={{ color: "#FFF", fontSize: "1rem", textAlign: "center", fontWeight: 500, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+              {galleryImages[selectedImageIndex].title}
+            </div>
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={handleNextImage}
+            style={{
+              position: "absolute",
+              right: "1.5rem",
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "none",
+              borderRadius: "50%",
+              width: "50px",
+              height: "50px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#FFF",
+              cursor: "pointer",
+              transition: "background 0.2s",
+              zIndex: 10000,
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"}
+            aria-label="Ảnh sau"
+          >
+            <ChevronRight size={24} />
+          </button>
         </div>
-      </section>
+      )}
 
       {/* Footer */}
       <footer 

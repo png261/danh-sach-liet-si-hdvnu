@@ -2383,10 +2383,12 @@ body {
 /* ── 7-Day Timeline Gallery Styles ── */
 
 /* Day tab scroll: hide scrollbar on all browsers */
-.day-tabs-scroll::-webkit-scrollbar {
+.day-tabs-scroll::-webkit-scrollbar,
+.gallery-scroll-container::-webkit-scrollbar {
   display: none;
 }
-.day-tabs-scroll {
+.day-tabs-scroll,
+.gallery-scroll-container {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -3504,6 +3506,10 @@ body {
 }
 
 /* ── React Responsive Modal Overrides ── */
+.react-responsive-modal-root {
+  z-index: 999999 !important;
+}
+
 .custom-modal-overlay {
   background: rgba(35, 30, 26, 0.7) !important;
   backdrop-filter: blur(12px) !important;
