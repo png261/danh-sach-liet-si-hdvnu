@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Volume2, VolumeX, Loader2 } from "lucide-react";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone } from "@/app/lib/martyrUtils";
 
@@ -125,14 +126,20 @@ export default function MartyrBottomCard({
         {/* ── Các nút thao tác (chỉ dùng chữ, không icon) ── */}
         <div className="bottom-card-actions">
 
-          {/* Nghe tiểu sử bằng giọng đọc */}
+          {/* Nghe tiểu sử bằng giọng đọc (dùng icon loa để tiết kiệm diện tích trên mobile) */}
           <button
             className={`bottom-card-btn bottom-card-btn-speak${isSpeaking ? " speaking" : ""}`}
             onClick={handleSpeak}
             disabled={isLoading}
             aria-label={isSpeaking ? "Dừng đọc tiểu sử" : "Nghe tiểu sử liệt sĩ"}
           >
-            {isLoading ? "Đang tải..." : isSpeaking ? "Dừng đọc" : "Nghe tiểu sử"}
+            {isLoading ? (
+              <Loader2 size={18} className="bottom-card-btn-spin" />
+            ) : isSpeaking ? (
+              <VolumeX size={18} />
+            ) : (
+              <Volume2 size={18} />
+            )}
           </button>
 
           {/* Xem toàn bộ tiểu sử */}

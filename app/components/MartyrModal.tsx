@@ -5,6 +5,8 @@ import { MapPin, Crosshair, Volume2, VolumeX, Loader2 } from "lucide-react";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone } from "@/app/lib/martyrUtils";
 import { LotusMotif, CloudDivider } from "@/app/components/VietnameseMotifs";
+import { Modal } from "react-responsive-modal";
+import "react-responsive-modal/styles.css";
 
 interface Props {
   martyr: Martyr;
@@ -122,19 +124,29 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <Modal
+      open={true}
+      onClose={onClose}
+      center
+      showCloseIcon={false}
+      classNames={{
+        overlay: "custom-modal-overlay",
+        modal: "custom-modal-container-detail",
+      }}
+    >
       <div
         className="modal-content"
-        onClick={(e) => e.stopPropagation()}
         style={{
-          border: "2px solid #EADFCE",
-          borderRadius: "16px",
-          backgroundColor: "#FCFAF6",
+          border: "none",
+          borderRadius: "0",
+          backgroundColor: "transparent",
           position: "relative",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          maxHeight: "90vh"
+          maxHeight: "none",
+          width: "100%",
+          height: "100%"
         }}
       >
         {/* Lotus watermark */}
@@ -276,6 +288,6 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

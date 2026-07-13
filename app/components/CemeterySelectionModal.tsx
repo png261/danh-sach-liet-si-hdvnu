@@ -1,9 +1,9 @@
 "use client";
 
 import { X, MapPin, Search } from "lucide-react";
-import { useEffect, useState } from "react";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
-
+import { Modal } from "react-responsive-modal";
+import "react-responsive-modal/styles.css";
 
 const CEMETERIES = [
   {
@@ -54,30 +54,18 @@ export default function CemeterySelectionModal({
   onSelect,
   selectedValue,
 }: CemeterySelectionModalProps) {
-  // Prevent body scroll when open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-
-
-  // Handle ESC key press
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
   return (
-    <div className="cem-modal-overlay" onClick={onClose}>
-      <div className="cem-modal-container" onClick={(e) => e.stopPropagation()}>
+    <Modal
+      open={true}
+      onClose={onClose}
+      center
+      showCloseIcon={false}
+      classNames={{
+        overlay: "custom-modal-overlay",
+        modal: "custom-modal-container",
+      }}
+    >
+      <div className="cem-modal-container">
         {/* Decorative Lotus */}
         <LotusMotif
           size={180}
@@ -152,6 +140,6 @@ export default function CemeterySelectionModal({
           })}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
