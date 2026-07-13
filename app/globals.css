@@ -1625,13 +1625,20 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
-  html, body {
+  html {
+    height: 100dvh;
+    height: 100vh;
+  }
+
+  body {
     overflow: hidden !important;
-    height: 100% !important;
+    height: 100dvh !important;
+    height: 100vh !important;
   }
 
   .app-layout-root {
-    height: 100% !important;
+    height: 100dvh !important;
+    height: 100vh !important;
     overflow: hidden !important;
   }
 
@@ -1807,8 +1814,8 @@ body {
 }
 
 .about-page-container {
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -2510,7 +2517,9 @@ body {
   }
 
   .cem-modal-container {
+    max-height: 100dvh;
     max-height: 100vh;
+    height: 100dvh;
     height: 100vh;
     width: 100vw;
     max-width: 100vw;
@@ -2534,20 +2543,21 @@ body {
 
   .cem-modal-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: none;
     padding: 0.75rem;
     gap: 0.75rem;
-    align-content: stretch;
+    align-content: start;
     flex: 1;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Make card horizontal on mobile and take full grid cell height */
+  /* Make card horizontal on mobile */
   .cem-card {
     flex-direction: row !important;
     align-items: stretch;
     min-height: 80px;
-    height: 100% !important;
+    height: auto !important;
   }
 
   .cem-card-img-wrapper {
