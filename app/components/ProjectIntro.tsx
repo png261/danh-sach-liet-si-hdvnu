@@ -9,6 +9,7 @@ import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
+import useEmblaCarousel from "embla-carousel-react";
 
 
 import { CloudDivider } from "@/app/components/VietnameseMotifs";
@@ -85,6 +86,13 @@ function CinematicText({ text, style, className }: { text: string; style?: React
 export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  
+  // Initialize Embla Carousel for smooth sliding with velocity dragging
+  const [emblaRef] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    dragFree: true
+  });
 
   useEffect(() => {
     const sound = new Howl({
@@ -405,19 +413,17 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             </span>
           </div>
 
-          <div 
-            className="gallery-scroll-container"
-            style={{
-              display: "flex",
-              gap: "1rem",
-              overflowX: "auto",
-              paddingBottom: "1.5rem",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              WebkitOverflowScrolling: "touch",
-              scrollSnapType: "x mandatory",
-            }}
-          >
+          {/* Embla Carousel Viewport wrapper */}
+          <div ref={emblaRef} style={{ overflow: "hidden", cursor: "grab" }} className="embla-viewport">
+            <div 
+              className="gallery-scroll-container embla-container"
+              style={{
+                display: "flex",
+                gap: "1rem",
+                paddingBottom: "1.5rem",
+                scrollSnapType: "none",
+              }}
+            >
             {galleryImages.map((img, index) => (
               <div
                 key={index}
@@ -485,6 +491,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>

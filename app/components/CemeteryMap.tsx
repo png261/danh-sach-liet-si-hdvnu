@@ -163,6 +163,11 @@ export default function CemeteryMap({
     onSelectZone(zoneName);
     onSelectMartyr(martyr);
 
+    // Phát tín hiệu phản hồi xúc giác nhẹ (Haptic Feedback) trên thiết bị di động
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
     const prev = lastClickRef.current;
