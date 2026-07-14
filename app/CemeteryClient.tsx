@@ -28,6 +28,8 @@ import MartyrBottomCard from "@/app/components/MartyrBottomCard";
 import MartyrShareModal from "@/app/components/MartyrShareModal";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorFallback from "@/app/components/ErrorFallback";
 
 const fetcher = async (cemetery: string) => {
   const supabase = createClient();
@@ -495,14 +497,20 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
             <section ref={graveGridRef} className="map-card-wrapper" style={{ position: "relative" }}>
               <LotusMotif size={100} style={{ position: "absolute", top: "10px", right: "20px", opacity: 0.05 }} />
 
-              <CemeteryMap
-                selectedCemetery={selectedCemetery}
-                selectedZone={selectedZone}
-                allMartyrs={martyrs}
-                selectedMartyrId={selectedMartyr?.id}
-                onSelectMartyr={handleOpenDetails}
-                onSelectZone={setSelectedZone}
-              />
+              <ErrorBoundary
+                FallbackComponent={(props) => (
+                  <ErrorFallback {...props} componentName="Sơ đồ Nghĩa trang" />
+                )}
+              >
+                <CemeteryMap
+                  selectedCemetery={selectedCemetery}
+                  selectedZone={selectedZone}
+                  allMartyrs={martyrs}
+                  selectedMartyrId={selectedMartyr?.id}
+                  onSelectMartyr={handleOpenDetails}
+                  onSelectZone={setSelectedZone}
+                />
+              </ErrorBoundary>
             </section>
 
           </div>
@@ -523,23 +531,39 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
 
       {/* ── Detail modal (đầy đủ) ──────────────────────────────────────────────── */}
       {isModalOpen && selectedMartyr && (
-        <MartyrModal
-          martyr={selectedMartyr}
-          onClose={() => {
-            setIsModalOpen(false);
-            // Khi đóng modal đầy đủ, giữ Bottom Card để người dùng không mất context
-            setIsBottomCardOpen(true);
-          }}
-          onLocate={handleLocateMartyrGrave}
-        />
+        <ErrorBoundary
+          FallbackComponent={(props) => (
+            <Modal open={true} onClose={() => setIsModalOpen(false)} center showCloseIcon={false} classNames={{ overlay: "custom-modal-overlay", modal: "custom-modal-container-detail" }}>
+              <ErrorFallback {...props} componentName="Chi tiết liệt sĩ" resetErrorBoundary={() => { props.resetErrorBoundary(); setIsModalOpen(false); }} />
+            </Modal>
+          )}
+        >
+          <MartyrModal
+            martyr={selectedMartyr}
+            onClose={() => {
+              setIsModalOpen(false);
+              // Khi đóng modal đầy đủ, giữ Bottom Card để người dùng không mất context
+              setIsBottomCardOpen(true);
+            }}
+            onLocate={handleLocateMartyrGrave}
+          />
+        </ErrorBoundary>
       )}
 
       {/* ── Share modal ────────────────────────────────────────────────────────── */}
       {isShareModalOpen && selectedMartyr && (
-        <MartyrShareModal
-          martyr={selectedMartyr}
-          onClose={() => setIsShareModalOpen(false)}
-        />
+        <ErrorBoundary
+          FallbackComponent={(props) => (
+            <Modal open={true} onClose={() => setIsShareModalOpen(false)} center showCloseIcon={false} classNames={{ overlay: "custom-modal-overlay", modal: "custom-modal-container-share" }}>
+              <ErrorFallback {...props} componentName="Chia sẻ thông tin" resetErrorBoundary={() => { props.resetErrorBoundary(); setIsShareModalOpen(false); }} />
+            </Modal>
+          )}
+        >
+          <MartyrShareModal
+            martyr={selectedMartyr}
+            onClose={() => setIsShareModalOpen(false)}
+          />
+        </ErrorBoundary>
       )}
 
       {/* ── Filter modal ───────────────────────────────────────────────────────── */}

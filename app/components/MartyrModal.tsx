@@ -10,6 +10,7 @@ import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
 import { getVietnameseLunarDateString } from "@/app/utils/lunar";
 import StyledQRCode from "@/app/components/StyledQRCode";
+import AnniversaryBadge from "@/app/components/AnniversaryBadge";
 
 interface Props {
   martyr: Martyr;
@@ -172,6 +173,9 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
               <InfoRow label="Cấp bậc"             value={martyr.rank} />
               <InfoRow label="Đơn vị"              value={martyr.unit} />
               <InfoRow label="Ngày hy sinh"        value={displayDeathDate} />
+              <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "center" }}>
+                <AnniversaryBadge deathDate={martyr.death_date} />
+              </div>
               <InfoRow label="Quê quán / Nguyên quán" value={martyr.hometown} />
 
               {martyr.relics         && <InfoRowFull label="Di vật lưu giữ"          value={martyr.relics} />}
