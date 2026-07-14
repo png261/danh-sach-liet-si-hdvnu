@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MapPin, Crosshair, Volume2, VolumeX, Loader2, X } from "lucide-react";
+import { MapPin, Crosshair, Volume2, VolumeX, Loader2 } from "lucide-react";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone } from "@/app/lib/martyrUtils";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
@@ -239,7 +239,6 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
             aria-label="Đóng cửa sổ tiểu sử"
             style={{ zIndex: 10, display: "inline-flex", alignItems: "center", gap: "4px" }}
           >
-            <X size={15} />
             <span>Đóng</span>
           </button>
 

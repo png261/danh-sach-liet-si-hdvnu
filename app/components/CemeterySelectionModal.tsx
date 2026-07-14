@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Image from "next/image";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
 import { Modal } from "react-responsive-modal";
