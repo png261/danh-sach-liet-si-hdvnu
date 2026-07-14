@@ -283,14 +283,13 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
           }}
         >
           <CinematicText 
-            text="Cổng tra cứu thông tin liệt sĩ" 
+            text="Cổng thông tin tra cứu" 
             animate={startAnimation ? "visible" : "hidden"}
           />
           <CinematicText 
-            text="xã Tứ Kỳ" 
+            text="liệt sĩ xã Tứ Kỳ" 
             animate={startAnimation ? "visible" : "hidden"}
-            delay={0.48} // Bắt đầu chạy sau khi dòng thứ nhất đã gần chạy xong
-            style={{ color: "var(--gold)" }}
+            delay={0.32} // Bắt đầu chạy sau khi dòng thứ nhất kết thúc
           />
         </h1>
 
