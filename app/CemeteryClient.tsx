@@ -315,11 +315,11 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
     const m = filteredMartyrs[index];
     if (!m) return null;
     return (
-      <div style={{ ...style, paddingBottom: "10px" }}>
+      <div style={style}>
         <div
           onClick={() => { handleLocateMartyrGrave(m); setIsFilterModalOpen(false); }}
           className="martyr-list-card"
-          style={{ height: "100%" }}
+          style={{ height: "calc(100% - 12px)" }}
         >
           <div style={{ color: "var(--primary-red)", fontWeight: 700, fontSize: "0.95rem" }}>{m.name}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
@@ -543,23 +543,40 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
       )}
 
       {/* ── Filter modal ───────────────────────────────────────────────────────── */}
-      <Modal
-        open={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        showCloseIcon={false}
-        classNames={{
-          overlay: "custom-modal-overlay",
-          modal: "custom-modal-container-filter",
-        }}
-        center
-      >
-        <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", overflow: "hidden" }}>
+      {isFilterModalOpen && (
+        <Modal
+          open={isFilterModalOpen}
+          onClose={() => setIsFilterModalOpen(false)}
+          showCloseIcon={false}
+          classNames={{
+            overlay: "custom-modal-overlay",
+            modal: "custom-modal-container-filter",
+          }}
+          center
+        >
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderBottom: "1px solid #EADFCE", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <Filter size={18} style={{ color: "var(--gold)" }} />
               <h3 style={{ margin: 0, fontSize: "1.15rem", fontFamily: "var(--font-serif)", color: "var(--text-bright)" }}>Tìm kiếm & Lọc liệt sĩ</h3>
             </div>
+            <button
+              onClick={() => setIsFilterModalOpen(false)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "color 0.2s"
+              }}
+              title="Đóng"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           {/* Content (Body - Scrollable) */}
@@ -677,12 +694,12 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
                 <span style={{ fontSize: "0.8rem", color: "var(--gold-dark)", fontWeight: "600" }}>{filteredMartyrs.length} phần mộ</span>
               </div>
 
-              <div style={{ height: "300px", paddingRight: "4px" }}>
+              <div style={{ height: "400px", paddingRight: "4px" }}>
                 {filteredMartyrs.length > 0 ? (
-                  <List<{}>
-                    style={{ height: "300px", width: "100%" }}
+                  <List<Record<string, never>>
+                    style={{ height: "400px", width: "100%" }}
                     rowCount={filteredMartyrs.length}
-                    rowHeight={150}
+                    rowHeight={190}
                     rowComponent={Row}
                     rowProps={{}}
                   />
@@ -714,8 +731,8 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
               Đóng
             </button>
           </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
 
       {isCemeteryModalOpen && (
         <CemeterySelectionModal
