@@ -132,28 +132,6 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
                   </span>
                 </button>
 
-                <button
-                  onClick={() => window.print()}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 20px",
-                    borderRadius: "24px",
-                    backgroundColor: "rgba(164,123,46,0.08)",
-                    color: "var(--gold)",
-                    border: "1px solid rgba(164,123,46,0.25)",
-                    fontSize: "0.85rem",
-                    fontWeight: "700",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)"
-                  }}
-                  className="modal-print-btn"
-                >
-                  <Printer size={15} />
-                  <span>In / Lưu PDF</span>
-                </button>
               </div>
             </div>
           </div>

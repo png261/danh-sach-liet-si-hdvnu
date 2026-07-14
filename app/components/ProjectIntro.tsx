@@ -431,17 +431,11 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
               animate={gallerySectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
               style={{
-                borderRadius: "12px",
                 overflow: "hidden",
                 cursor: "pointer",
                 position: "relative",
-                backgroundColor: "#FFF",
-                border: "1px solid #EADFCE",
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
-                marginBottom: "1rem",
-                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
-              whileHover={{ y: -4, boxShadow: "0 12px 28px rgba(164, 123, 46, 0.14)" }}
+              whileHover={{ opacity: 0.88 }}
             >
               <Image
                 src={img.src}
@@ -456,26 +450,6 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
                 }}
                 className="masonry-img"
               />
-              <div style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)",
-                padding: "2rem 0.9rem 0.75rem",
-                color: "#FFF",
-              }}>
-                <span style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                  letterSpacing: "0.01em",
-                  lineHeight: 1.3,
-                  display: "block",
-                }}>
-                  {img.title}
-                </span>
-              </div>
             </motion.div>
           ))}
         </Masonry>
