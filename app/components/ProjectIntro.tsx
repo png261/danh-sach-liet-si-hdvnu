@@ -16,6 +16,7 @@ import { CloudDivider } from "@/app/components/VietnameseMotifs";
 
 interface ProjectIntroProps {
   onEnterSearch: () => void;
+  startAnimation?: boolean;
 }
 
 interface GalleryImage {
@@ -60,13 +61,13 @@ const wordVariants = {
   }
 };
 
-function CinematicText({ text, style, className }: { text: string; style?: React.CSSProperties; className?: string }) {
+function CinematicText({ text, style, className, animate = "visible" }: { text: string; style?: React.CSSProperties; className?: string; animate?: string }) {
   const words = text.split(" ");
   return (
     <motion.span
       variants={containerVariants}
       initial="hidden"
-      animate="visible"
+      animate={animate}
       style={{ display: "inline-flex", flexWrap: "wrap", justifyContent: "center", ...style }}
       className={className}
     >
@@ -83,7 +84,7 @@ function CinematicText({ text, style, className }: { text: string; style?: React
   );
 }
 
-export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
+export default function ProjectIntro({ onEnterSearch, startAnimation = true }: ProjectIntroProps) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   
@@ -273,13 +274,16 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             justifyContent: "center"
           }}
         >
-          <CinematicText text="Cổng tra cứu thông tin liệt sĩ xã Tứ Kỳ" />
+          <CinematicText 
+            text="Cổng tra cứu thông tin liệt sĩ xã Tứ Kỳ" 
+            animate={startAnimation ? "visible" : "hidden"}
+          />
         </h1>
 
         {/* Subtext description */}
         <motion.p 
           initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={startAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
           transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
           style={{ 
             fontSize: "clamp(0.85rem, 1.8vw, 1.05rem)", 
@@ -296,7 +300,7 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
         {/* Action Buttons */}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={startAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
           transition={{ delay: 1.1, duration: 0.8, ease: "easeOut" }}
           style={{ 
             marginTop: "2.5rem", 

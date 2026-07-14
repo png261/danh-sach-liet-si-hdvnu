@@ -345,7 +345,10 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
     return (
       <SWRConfig value={{ provider: localStorageProvider }}>
         {renderLoader()}
-        <ProjectIntro onEnterSearch={() => setIsCemeteryModalOpen(true)} />
+        <ProjectIntro 
+          onEnterSearch={() => setIsCemeteryModalOpen(true)} 
+          startAnimation={!pageLoading}
+        />
         {isCemeteryModalOpen && (
           <CemeterySelectionModal
             onClose={() => setIsCemeteryModalOpen(false)}
