@@ -8,7 +8,6 @@ import { getPhysicalZone } from "@/app/lib/martyrUtils";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
-import { FacebookShareButton } from "react-share";
 
 interface MartyrShareModalProps {
   martyr: Martyr;
@@ -46,7 +45,7 @@ export default function MartyrShareModal({ martyr, onClose }: MartyrShareModalPr
   }, []);
 
   const shareUrl = typeof window !== "undefined"
-    ? `https://nghiatrangtuky.vercel.app${window.location.pathname}?martyr=${martyr.id}`
+    ? `${window.location.origin}${window.location.pathname}?martyr=${martyr.id}`
     : `https://nghiatrangtuky.vercel.app/[cemetery]?martyr=${martyr.id}`;
 
   const handleDownloadCard = () => {
@@ -285,9 +284,12 @@ export default function MartyrShareModal({ martyr, onClose }: MartyrShareModalPr
                   <span>Chia sẻ Zalo</span>
                 </a>
 
-                <FacebookShareButton url={shareUrl} hashtag="#TriAnLietSi" style={{ flex: 1, display: "flex" }}>
-                  <div style={{
-                    width: "100%",
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    flex: 1,
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -298,15 +300,16 @@ export default function MartyrShareModal({ martyr, onClose }: MartyrShareModalPr
                     color: "#FFFFFF",
                     fontSize: "0.8rem",
                     fontWeight: "700",
+                    textDecoration: "none",
                     cursor: "pointer",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
-                  }}>
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style={{ flexShrink: 0 }}>
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                    <span>Chia sẻ Facebook</span>
-                  </div>
-                </FacebookShareButton>
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style={{ flexShrink: 0 }}>
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  <span>Chia sẻ Facebook</span>
+                </a>
               </div>
             </div>
 
