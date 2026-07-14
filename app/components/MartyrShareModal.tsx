@@ -10,6 +10,7 @@ import { getPhysicalZone } from "@/app/lib/martyrUtils";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
+import { getVietnameseLunarDateString } from "@/app/utils/lunar";
 
 interface MartyrShareModalProps {
   martyr: Martyr;
@@ -33,6 +34,11 @@ const MemorialCard = forwardRef<HTMLDivElement, MemorialCardProps>(({
   logoDoanXaUrl,
   shareUrl
 }, ref) => {
+  const lunarDeathDate = getVietnameseLunarDateString(martyr.death_date);
+  const displayDeathDate = lunarDeathDate 
+    ? `${martyr.death_date} (tức ngày ${lunarDeathDate})`
+    : (martyr.death_date || "Chưa rõ");
+
   return (
     <div
       ref={ref}
@@ -102,7 +108,7 @@ const MemorialCard = forwardRef<HTMLDivElement, MemorialCardProps>(({
             <div><strong>Nhập ngũ:</strong> {martyr.enlistment_date || "Chưa rõ"}</div>
             <div><strong>Cấp bậc:</strong> {martyr.rank || "Chưa rõ"}</div>
             <div><strong>Đơn vị:</strong> {martyr.unit || "Chưa rõ"}</div>
-            <div style={{ gridColumn: "span 2" }}><strong>Ngày hy sinh:</strong> {martyr.death_date || "Chưa rõ"}</div>
+            <div style={{ gridColumn: "span 2" }}><strong>Ngày hy sinh:</strong> {displayDeathDate}</div>
             <div style={{ gridColumn: "span 2" }}><strong>Quê quán:</strong> {martyr.hometown || "Chưa rõ"}</div>
           </div>
         </div>

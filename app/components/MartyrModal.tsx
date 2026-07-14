@@ -9,6 +9,7 @@ import Equalizer from "@/app/components/Equalizer";
 import { Modal } from "react-responsive-modal";
 import { QRCodeSVG } from "qrcode.react";
 import "react-responsive-modal/styles.css";
+import { getVietnameseLunarDateString } from "@/app/utils/lunar";
 
 interface Props {
   martyr: Martyr;
@@ -36,6 +37,11 @@ function InfoRowFull({ label, value }: { label: string; value: string }) {
 
 export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
   const { isSpeaking, isLoading, handleSpeak } = useMartyrTTS(martyr);
+
+  const lunarDeathDate = getVietnameseLunarDateString(martyr.death_date);
+  const displayDeathDate = lunarDeathDate 
+    ? `${martyr.death_date} (tức ngày ${lunarDeathDate})`
+    : martyr.death_date;
 
   return (
     <>
@@ -187,7 +193,7 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
               <InfoRow label="Nhập ngũ"            value={martyr.enlistment_date} />
               <InfoRow label="Cấp bậc"             value={martyr.rank} />
               <InfoRow label="Đơn vị"              value={martyr.unit} />
-              <InfoRow label="Ngày hy sinh"        value={martyr.death_date} />
+              <InfoRow label="Ngày hy sinh"        value={displayDeathDate} />
               <InfoRow label="Quê quán / Nguyên quán" value={martyr.hometown} />
 
               {martyr.relics         && <InfoRowFull label="Di vật lưu giữ"          value={martyr.relics} />}
@@ -262,7 +268,7 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
               </tr>
               <tr>
                 <td><strong>Ngày hy sinh:</strong></td>
-                <td>{martyr.death_date || "Chưa rõ"}</td>
+                <td>{displayDeathDate || "Chưa rõ"}</td>
                 <td><strong>Quê quán:</strong></td>
                 <td>{martyr.hometown || "Chưa rõ"}</td>
               </tr>

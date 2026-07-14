@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback, useTransition } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { Search, RotateCcw, MapPin, Calendar, Map, Info, ChevronLeft, ChevronRight, Crosshair, Activity, ArrowLeft, Filter, X, User, Grid, Mic, MicOff } from "lucide-react";
+import { Search, RotateCcw, MapPin, Calendar, Map, Info, ChevronLeft, ChevronRight, Crosshair, Activity, ArrowLeft, Filter, X, User, Grid } from "lucide-react";
 import Link from "next/link";
 
 import type { Martyr } from "@/app/types/martyr";
@@ -15,9 +15,7 @@ import { useOnClickOutside } from "usehooks-ts";
 import { useQueryState, parseAsString } from "nuqs";
 import { List } from "react-window";
 import { useCemeteryStore } from "@/app/hooks/useCemeteryStore";
-import { useSpeechRecognition } from "@/app/hooks/useSpeechRecognition";
 import { AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
 import { LotusMotif, CloudDivider } from "@/app/components/VietnameseMotifs";
 import ProjectIntro from "@/app/components/ProjectIntro";
 import CemeteryDropdown from "@/app/components/CemeteryDropdown";
@@ -99,40 +97,6 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
   const graveGridRef = useRef<HTMLDivElement>(null);
   const quickSearchRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
-
-  // Voice Search Error Handling with custom toasts
-  const handleVoiceSearchError = useCallback((error: string) => {
-    if (error === "network") {
-      toast.error("Không thể kết nối dịch vụ giọng nói của trình duyệt (Google/Apple). Vui lòng kiểm tra lại kết nối mạng!");
-    } else if (error === "not-allowed") {
-      toast.error("Quyền truy cập Microphone bị từ chối. Vui lòng cấp quyền micro trong cài đặt trình duyệt!");
-    } else if (error === "no-speech") {
-      toast.warning("Không nghe rõ giọng nói. Vui lòng thử lại!");
-    } else {
-      toast.error("Lỗi nhận diện giọng nói: " + error);
-    }
-  }, []);
-
-  // Speech Recognition for Header Quick Search
-  const {
-    isListening: isListeningQuick,
-    startListening: startListeningQuick,
-    stopListening: stopListeningQuick,
-    isSupported: isSupportedQuick
-  } = useSpeechRecognition((text) => {
-    setQuickSearch(text);
-    setIsQuickSearchFocused(true);
-  }, handleVoiceSearchError);
-
-  // Speech Recognition for Advanced Filter Search
-  const {
-    isListening: isListeningAdvanced,
-    startListening: startListeningAdvanced,
-    stopListening: stopListeningAdvanced,
-    isSupported: isSupportedAdvanced
-  } = useSpeechRecognition((text) => {
-    setSearchName(text);
-  }, handleVoiceSearchError);
 
   // URL ?liet-si= query param — nuqs tự đồng bộ 2 chiều với URL, không cần useEffect thủ công
   const [martyrIdParam, setMartyrIdParam] = useQueryState(
@@ -461,26 +425,6 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
                   <X size={12} />
                 </button>
               )}
-              {isSupportedQuick && (
-                <button
-                  type="button"
-                  className={`quick-search-mic-btn${isListeningQuick ? " is-listening" : ""}`}
-                  onClick={isListeningQuick ? stopListeningQuick : startListeningQuick}
-                  title={isListeningQuick ? "Đang lắng nghe... Bấm để dừng" : "Tìm kiếm bằng giọng nói"}
-                  style={{
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                    padding: "4px 8px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: isListeningQuick ? "var(--primary-red)" : "var(--text-muted)",
-                    transition: "color 0.2s",
-                  }}
-                >
-                  {isListeningQuick ? <MicOff size={14} className="mic-listening-pulse" /> : <Mic size={14} />}
-                </button>
-              )}
               <button
                 className="quick-search-filter-btn"
                 onClick={() => setIsFilterModalOpen(true)}
@@ -657,34 +601,12 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
                     id="modal-filter-name" 
                     type="text" 
                     className="sidebar-search-input"
-                    style={{ paddingLeft: "2.2rem", paddingRight: isSupportedAdvanced ? "2.2rem" : "0.6rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
+                    style={{ paddingLeft: "2.2rem", borderColor: "#DDD4C0", width: "100%", padding: "0.6rem 0.6rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #DDD4C0", fontSize: "0.9rem", boxSizing: "border-box", outline: "none" }}
                     placeholder="Tìm tên..."
                     value={searchName} 
                     onChange={(e) => setSearchName(e.target.value)} 
                   />
                   <Search size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-                  {isSupportedAdvanced && (
-                    <button
-                      type="button"
-                      onClick={isListeningAdvanced ? stopListeningAdvanced : startListeningAdvanced}
-                      style={{
-                        position: "absolute",
-                        right: "0.75rem",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        border: "none",
-                        background: "none",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        padding: 0,
-                        color: isListeningAdvanced ? "var(--primary-red)" : "var(--text-muted)",
-                      }}
-                      title={isListeningAdvanced ? "Đang nghe..." : "Giọng nói"}
-                    >
-                      {isListeningAdvanced ? <MicOff size={14} className="mic-listening-pulse" /> : <Mic size={14} />}
-                    </button>
-                  )}
                 </div>
               </div>
 

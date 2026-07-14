@@ -10,6 +10,7 @@
     "generate:audio": "python3 scripts/generate_audio.py"
   },
   "dependencies": {
+    "@dqcai/vn-lunar": "^1.0.1",
     "@floating-ui/react": "^0.27.20",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.2",
