@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import { Howl } from "howler";
 import { ArrowRight, Play, Calendar } from "lucide-react";
@@ -93,6 +94,10 @@ function CinematicText({ text, style, className, animate = "visible", delay = 0 
 export default function ProjectIntro({ onEnterSearch, startAnimation = true }: ProjectIntroProps) {
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+
+  // InView hooks for scroll-triggered animations
+  const [gallerySectionRef, gallerySectionInView] = useInView({ triggerOnce: true, threshold: 0.15 });
+  const [footerRef, footerInView] = useInView({ triggerOnce: true, threshold: 0.2 });
   
   // Initialize Embla Carousel for smooth sliding with velocity dragging
   const [emblaRef] = useEmblaCarousel({
@@ -383,7 +388,13 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
         }}
       >
         {/* Section Header */}
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <motion.div
+          ref={gallerySectionRef}
+          initial={{ opacity: 0, y: 30 }}
+          animate={gallerySectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          style={{ textAlign: "center", marginBottom: "2rem" }}
+        >
           <span 
             style={{ 
               fontSize: "0.75rem", 
@@ -410,7 +421,7 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
           >
             Hình ảnh hành trình hoạt động
           </h2>
-        </div>
+        </motion.div>
 
         {/* Scrollable Gallery */}
         <div style={{ position: "relative" }}>
@@ -530,7 +541,11 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
       />
 
       {/* Footer */}
-      <footer 
+      <motion.footer
+        ref={footerRef}
+        initial={{ opacity: 0, y: 20 }}
+        animate={footerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 0.7, ease: "easeOut" }} 
         style={{ 
           borderTop: "1px dashed #EADFCE", 
           padding: "2.5rem 1.5rem", 
@@ -569,7 +584,7 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
             YouTube: SVTN Hải Dương tại ĐHQGHN
           </a>
         </p>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
