@@ -66,3 +66,6 @@ public/bgm.mp3
 public/intro_bgm.mp3
 public/panorama-tour/assets/background-audio.mp3
 public/panorama-tour/
+
+# Temporary python scripts caching
+/scripts/temp_audios/

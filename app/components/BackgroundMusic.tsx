@@ -1,68 +1,39 @@
 "use client";
 
 import { useEffect } from "react";
-import { Howl } from "howler";
+import useSound from "use-sound";
+import type { Howl } from "howler";
 
-// Declare global properties for TypeScript compatibility
+// Expose the underlying Howl instance on window so useMartyrTTS
+// can call .fade() to duck the music during TTS playback.
 declare global {
-  interface Window {
-    bgMusic?: Howl;
-  }
+  interface Window { bgMusic?: Howl; }
 }
 
 export default function BackgroundMusic() {
+  const [play, { sound }] = useSound(
+    "https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3",
+    { volume: 0.18, loop: true, interrupt: false }
+  );
+
+  // Expose Howl instance for external fade control (e.g. useMartyrTTS)
   useEffect(() => {
-    const sound = new Howl({
-      src: ["https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3"],
-      html5: false,
-      loop: true,
-      volume: 0.18
-    });
+    if (sound) window.bgMusic = sound as unknown as Howl;
+    return () => { window.bgMusic = undefined; };
+  }, [sound]);
 
-    if (typeof window !== "undefined") {
-      window.bgMusic = sound;
-    }
-
-    const tryPlay = () => {
-      if (sound.state() === "unloaded") {
-        sound.load();
-      }
-      if (!sound.playing()) {
-        sound.play();
-      }
-    };
-
+  // Auto-play; retry on first user interaction for Safari/iOS autoplay policy
+  useEffect(() => {
+    const tryPlay = () => play();
     tryPlay();
 
-    // Fallback: Safari/iOS blocks autoplay until first interaction
-    const onFirstInteraction = () => {
-      tryPlay();
-      removeListeners();
-    };
+    const onInteraction = () => { tryPlay(); removeListeners(); };
+    const events = ["click", "touchstart", "keydown", "mousedown", "pointerdown"] as const;
+    const removeListeners = () => events.forEach(e => document.removeEventListener(e, onInteraction));
 
-    const removeListeners = () => {
-      document.removeEventListener("click", onFirstInteraction);
-      document.removeEventListener("touchstart", onFirstInteraction);
-      document.removeEventListener("keydown", onFirstInteraction);
-      document.removeEventListener("mousedown", onFirstInteraction);
-      document.removeEventListener("pointerdown", onFirstInteraction);
-    };
-
-    if (!sound.playing()) {
-      document.addEventListener("click", onFirstInteraction);
-      document.addEventListener("touchstart", onFirstInteraction);
-      document.addEventListener("keydown", onFirstInteraction);
-      document.addEventListener("mousedown", onFirstInteraction);
-      document.addEventListener("pointerdown", onFirstInteraction);
-    }
-
-    return () => {
-      sound.unload();
-      if (typeof window !== "undefined") {
-        window.bgMusic = undefined;
-      }
-      removeListeners();
-    };
+    events.forEach(e => document.addEventListener(e, onInteraction, { once: true }));
+    return removeListeners;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;

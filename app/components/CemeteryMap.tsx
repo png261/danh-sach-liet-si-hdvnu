@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone, groupMartyrsByRow } from "@/app/lib/martyrUtils";
+import { useMediaQuery } from "usehooks-ts";
 
 interface CemeteryMapProps {
   selectedCemetery: string;
@@ -38,8 +39,13 @@ export default function CemeteryMap({
 
   // --- Tooltip & Interaction State ---
   const [hoveredMartyr, setHoveredMartyr] = useState<Martyr | null>(null);
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [showGrid] = useState(true);
+
+  // Responsive via CSS media query (no manual resize listener needed)
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
+  // Cursor position for tooltip (position:fixed follows mouse precisely)
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
   // Strip leading zeros if followed by a number
   const formatGraveNo = (no: string) => {
@@ -47,22 +53,10 @@ export default function CemeteryMap({
     return trimmed.replace(/^0+(?=\d)/, "");
   };
 
-  // --- Responsive / Mobile detection & Auto-Centering ---
-  const [isMobile, setIsMobile] = useState(false);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const lastClickRef = useRef<{ time: number; martyrId: string | null }>({ time: 0, martyrId: null });
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Programmatically trigger centering after layout shifts have settled
   useEffect(() => {
     const timer = setTimeout(() => {
       if (transformRef.current) {
@@ -641,9 +635,9 @@ export default function CemeteryMap({
         )}
       </TransformWrapper>
 
-      {/* Floating Tooltip */}
+      {/* Tooltip bám theo cursor — position:fixed + tọa độ chuột thực */}
       {hoveredMartyr && (
-        <div 
+        <div
           className="map-hover-tooltip"
           style={{
             position: "fixed",

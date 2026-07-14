@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { MapPin, Crosshair, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { MapPin, Crosshair, Volume2, VolumeX, Loader2, Printer } from "lucide-react";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone } from "@/app/lib/martyrUtils";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
+import { useMartyrTTS } from "@/app/hooks/useMartyrTTS";
+import Equalizer from "@/app/components/Equalizer";
 import { Modal } from "react-responsive-modal";
+import { QRCodeSVG } from "qrcode.react";
 import "react-responsive-modal/styles.css";
 
 interface Props {
@@ -32,173 +34,8 @@ function InfoRowFull({ label, value }: { label: string; value: string }) {
   );
 }
 
-const makeSafeId = (id: string) => {
-  if (!id) return "";
-  return id
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "");
-};
-
 export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const stopAll = useCallback(() => {
-    // Stop Web Speech API
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    // Stop Supabase audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    setIsSpeaking(false);
-    setIsLoading(false);
-
-    // Restore background music volume
-    if (typeof window !== "undefined" && window.bgMusic) {
-      window.bgMusic.fade(window.bgMusic.volume(), 0.18, 1000);
-    }
-  }, []);
-
-  // Stop when unmounting
-  useEffect(() => {
-    return () => stopAll();
-  }, [stopAll]);
-
-  // Stop when changing martyr
-  useEffect(() => {
-    stopAll(); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [martyr.id, stopAll]);
-
-  const handleSpeak = async () => {
-    if (isSpeaking || isLoading) {
-      stopAll();
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Try playing pre-generated audio from Supabase
-    const audioUrl = `https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/audios/${makeSafeId(martyr.id)}.mp3`;
-    
-    const playPreGenerated = () => {
-      return new Promise<boolean>((resolve) => {
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
-
-        audio.onloadedmetadata = () => {
-          audio.play()
-            .then(() => {
-              setIsLoading(false);
-              setIsSpeaking(true);
-              // Fade out background music
-              if (typeof window !== "undefined" && window.bgMusic) {
-                window.bgMusic.fade(window.bgMusic.volume(), 0.03, 1000);
-              }
-              resolve(true);
-            })
-            .catch(() => {
-              resolve(false);
-            });
-        };
-
-        audio.onended = () => {
-          setIsSpeaking(false);
-          audioRef.current = null;
-          // Fade in background music
-          if (typeof window !== "undefined" && window.bgMusic) {
-            window.bgMusic.fade(window.bgMusic.volume(), 0.18, 1000);
-          }
-        };
-
-        audio.onerror = () => {
-          resolve(false);
-        };
-      });
-    };
-
-    const success = await playPreGenerated();
-    if (success) return;
-
-    // Fallback to native Web Speech API
-    if (typeof window === "undefined" || !window.speechSynthesis) {
-      setIsLoading(false);
-      alert("Trình duyệt của bạn không hỗ trợ đọc thành tiếng.");
-      return;
-    }
-
-    const textToSpeak = [
-      "Thông tin Anh hùng Liệt sĩ.",
-      `Họ và tên: ${martyr.name}.`,
-      `Nghĩa trang: ${martyr.cemetery}.`,
-      `Vị trí phần mộ: Mộ số ${martyr.grave_no || "Chưa rõ"}, hàng số ${martyr.row_no || "Chưa rõ"}, khu vực ${getPhysicalZone(martyr) || "Chưa rõ"}.`,
-      martyr.birth_year      ? `Sinh năm: ${martyr.birth_year}.`      : "",
-      martyr.hometown        ? `Quê quán: ${martyr.hometown}.`        : "",
-      martyr.enlistment_date ? `Nhập ngũ: ${martyr.enlistment_date}.` : "",
-      martyr.rank            ? `Cấp bậc: ${martyr.rank}.`             : "",
-      martyr.unit            ? `Đơn vị: ${martyr.unit}.`              : "",
-      martyr.death_date      ? `Hy sinh ngày: ${martyr.death_date}.`  : "",
-    ].filter(Boolean).join(" ");
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang  = "vi-VN";
-    utterance.rate  = 0.88;
-    utterance.pitch = 1;
-
-    const pickVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
-      return (
-        voices.find(v => v.lang === "vi-VN" && /google/i.test(v.name)) ||
-        voices.find(v => v.lang === "vi-VN") ||
-        voices.find(v => v.lang.startsWith("vi")) ||
-        null
-      );
-    };
-
-    const speak = () => {
-      const voice = pickVoice();
-      if (voice) utterance.voice = voice;
-      utterance.onstart = () => {
-        setIsLoading(false);
-        setIsSpeaking(true);
-        if (typeof window !== "undefined" && window.bgMusic) {
-          window.bgMusic.fade(window.bgMusic.volume(), 0.03, 1000);
-        }
-      };
-      utterance.onend   = () => {
-        setIsSpeaking(false);
-        if (typeof window !== "undefined" && window.bgMusic) {
-          window.bgMusic.fade(window.bgMusic.volume(), 0.18, 1000);
-        }
-      };
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        setIsLoading(false);
-        if (typeof window !== "undefined" && window.bgMusic) {
-          window.bgMusic.fade(window.bgMusic.volume(), 0.18, 1000);
-        }
-      };
-      window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        speak();
-      };
-    } else {
-      speak();
-    }
-  };
+  const { isSpeaking, isLoading, handleSpeak } = useMartyrTTS(martyr);
 
   return (
     <>
@@ -250,44 +87,68 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
                 {martyr.name}
               </h2>
 
-              {/* Audio Speech Control */}
-              <button
-                onClick={handleSpeak}
-                disabled={isLoading}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "0.6rem",
-                  padding: "8px 20px",
-                  borderRadius: "24px",
-                  backgroundColor:
-                    isLoading ? "rgba(164,123,46,0.12)" :
-                    isSpeaking ? "var(--primary-red)" :
-                    "rgba(164,123,46,0.08)",
-                  color: isSpeaking ? "#FFFFFF" : "var(--gold)",
-                  border: "1px solid " + (isSpeaking ? "var(--primary-red)" : "rgba(164,123,46,0.25)"),
-                  fontSize: "0.85rem",
-                  fontWeight: "700",
-                  cursor: isLoading ? "wait" : "pointer",
-                  transition: "all 0.2s ease",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.08)"
-                }}
-                className="modal-speak-btn"
-              >
-                {isLoading ? (
-                  <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
-                ) : isSpeaking ? (
-                  <VolumeX size={15} />
-                ) : (
-                  <Volume2 size={15} />
-                )}
-                <span>
-                  {isLoading ? "Đang tải giọng đọc..." :
-                   isSpeaking ? "Bấm để dừng đọc" :
-                   "Bấm để nghe đọc tiểu sử"}
-                </span>
-              </button>
+              {/* Audio Speech Control & Print Document */}
+              <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "0.6rem" }}>
+                <button
+                  onClick={handleSpeak}
+                  disabled={isLoading}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 20px",
+                    borderRadius: "24px",
+                    backgroundColor:
+                      isLoading ? "rgba(164,123,46,0.12)" :
+                      isSpeaking ? "var(--primary-red)" :
+                      "rgba(164,123,46,0.08)",
+                    color: isSpeaking ? "#FFFFFF" : "var(--gold)",
+                    border: "1px solid " + (isSpeaking ? "var(--primary-red)" : "rgba(164,123,46,0.25)"),
+                    fontSize: "0.85rem",
+                    fontWeight: "700",
+                    cursor: isLoading ? "wait" : "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)"
+                  }}
+                  className="modal-speak-btn"
+                >
+                  {isLoading ? (
+                    <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
+                  ) : isSpeaking ? (
+                    <Equalizer size={15} />
+                  ) : (
+                    <Volume2 size={15} />
+                  )}
+                  <span>
+                    {isLoading ? "Đang tải..." :
+                     isSpeaking ? "Dừng đọc" :
+                     "Nghe đọc"}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => window.print()}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 20px",
+                    borderRadius: "24px",
+                    backgroundColor: "rgba(164,123,46,0.08)",
+                    color: "var(--gold)",
+                    border: "1px solid rgba(164,123,46,0.25)",
+                    fontSize: "0.85rem",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)"
+                  }}
+                  className="modal-print-btn"
+                >
+                  <Printer size={15} />
+                  <span>In / Lưu PDF</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -369,6 +230,77 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
           </div>
         </div>
       </Modal>
+
+      {/* Printable container (hidden on screen, visible only during print) */}
+      <div className="printable-profile-container">
+        <div className="print-header">
+          <div className="print-logo-text">ĐỘI SINH VIÊN TÌNH NGUYỆN HẢI DƯƠNG TẠI ĐHQGHN — ĐOÀN XÃ TỨ KỲ</div>
+          <h1 className="print-title font-serif">HỒ SƠ THÔNG TIN LIỆT SĨ</h1>
+        </div>
+
+        <div className="print-body">
+          <div className="print-name font-serif">{martyr.name}</div>
+          
+          <div className="print-location-details">
+            <strong>Nghĩa trang:</strong> {martyr.cemetery} <br/>
+            <strong>Vị trí phần mộ:</strong> Khu {getPhysicalZone(martyr)} — Hàng {martyr.row_no || "Chưa rõ"} — Mộ số {martyr.grave_no || "Chưa rõ"}
+          </div>
+
+          <table className="print-table">
+            <tbody>
+              <tr>
+                <td><strong>Năm sinh:</strong></td>
+                <td>{martyr.birth_year || "Chưa rõ"}</td>
+                <td><strong>Nhập ngũ:</strong></td>
+                <td>{martyr.enlistment_date || "Chưa rõ"}</td>
+              </tr>
+              <tr>
+                <td><strong>Cấp bậc:</strong></td>
+                <td>{martyr.rank || "Chưa rõ"}</td>
+                <td><strong>Đơn vị:</strong></td>
+                <td>{martyr.unit || "Chưa rõ"}</td>
+              </tr>
+              <tr>
+                <td><strong>Ngày hy sinh:</strong></td>
+                <td>{martyr.death_date || "Chưa rõ"}</td>
+                <td><strong>Quê quán:</strong></td>
+                <td>{martyr.hometown || "Chưa rõ"}</td>
+              </tr>
+              {martyr.relics && (
+                <tr>
+                  <td colSpan={4}><strong>Di vật lưu giữ:</strong> {martyr.relics}</td>
+                </tr>
+              )}
+              {martyr.gather_location && (
+                <tr>
+                  <td colSpan={4}><strong>Địa điểm quy tập:</strong> {martyr.gather_location}</td>
+                </tr>
+              )}
+              {martyr.notes && (
+                <tr>
+                  <td colSpan={4}><strong>Ghi chú:</strong> {martyr.notes}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="print-footer">
+          <div className="print-qr-section">
+            <QRCodeSVG 
+              value={typeof window !== "undefined"
+                ? `${window.location.origin}${window.location.pathname}?liet-si=${martyr.id}`
+                : `https://nghiatrangtuky.vercel.app/[cemetery]?liet-si=${martyr.id}`} 
+              size={90} 
+            />
+            <p>Quét mã QR để định vị nhanh sơ đồ vị trí phần mộ trực tuyến trên Bản đồ số nghĩa trang.</p>
+          </div>
+          <div className="print-signature">
+            <p style={{ margin: 0, fontStyle: "italic", fontSize: "9pt", fontWeight: "normal" }}>Tứ Kỳ, Hải Dương</p>
+            <p style={{ margin: "5px 0 0 0" }}>Đoàn xã Tứ Kỳ kính dâng</p>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

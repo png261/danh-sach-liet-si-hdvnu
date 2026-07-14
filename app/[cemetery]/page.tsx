@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import CemeteryClient from "../CemeteryClient";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Martyr } from "@/app/types/martyr";
 import { cacheLife } from "next/cache";
+import { SLUG_TO_CEMETERY } from "@/app/lib/martyrUtils";
 
 export const unstable_instant = { 
   prefetch: "static",
@@ -11,17 +13,6 @@ export const unstable_instant = {
 
 type Props = {
   params: Promise<{ cemetery: string }>;
-};
-
-const SLUG_TO_CEMETERY: Record<string, string> = {
-  "tu-ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
-  "tu_ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
-  "minh-duc": "Nghĩa trang liệt sĩ Minh Đức",
-  "minh_duc": "Nghĩa trang liệt sĩ Minh Đức",
-  "quang-khai": "Nghĩa trang liệt sĩ Quang Khải",
-  "quang_khai": "Nghĩa trang liệt sĩ Quang Khải",
-  "quang-phuc": "Nghĩa trang liệt sĩ xã Quang Phục",
-  "quang_phuc": "Nghĩa trang liệt sĩ xã Quang Phục",
 };
 
 // Define static parameters for static site generation
@@ -116,10 +107,47 @@ export default async function Page({ params }: Props) {
     martyrs = await fetchMartyrs(cemeteryName);
   }
 
+  // Schema.org Structured Data for SEO optimization
+  const isTuKy = cemeterySlug === "tu-ky" || cemeterySlug === "tu_ky";
+  const isMinhDuc = cemeterySlug === "minh-duc" || cemeterySlug === "minh_duc";
+  const isQuangKhai = cemeterySlug === "quang-khai" || cemeterySlug === "quang_khai";
+  const isQuangPhuc = cemeterySlug === "quang-phuc" || cemeterySlug === "quang_phuc";
+
+  const locality = isTuKy ? "Xã Tứ Kỳ" : isMinhDuc ? "Xã Minh Đức" : isQuangKhai ? "Xã Quang Khải" : isQuangPhuc ? "Xã Quang Phục" : "Huyện Tứ Kỳ";
+  const count = isTuKy ? 216 : isMinhDuc ? 332 : isQuangKhai ? 267 : isQuangPhuc ? 200 : 0;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    "name": cemeteryName || "Nghĩa trang liệt sĩ xã Tứ Kỳ",
+    "description": `Bản đồ số và thông tin tra cứu phần mộ Anh hùng Liệt sĩ tại ${cemeteryName || "Nghĩa trang liệt sĩ xã Tứ Kỳ"}, huyện Tứ Kỳ, tỉnh Hải Dương.`,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": locality,
+      "addressRegion": "Hải Dương",
+      "addressCountry": "VN"
+    },
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "Số lượng phần mộ",
+        "value": count
+      }
+    ]
+  };
+
   return (
-    <CemeteryClient 
-      initialCemeterySlug={cemeterySlug} 
-      initialMartyrs={martyrs} 
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense fallback={null}>
+        <CemeteryClient 
+          initialCemeterySlug={cemeterySlug} 
+          initialMartyrs={martyrs} 
+        />
+      </Suspense>
+    </>
   );
 }

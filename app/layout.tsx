@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
+import { NuqsAdapter } from "nuqs/adapters/next";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-primary",
@@ -55,7 +59,12 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${beVietnamPro.variable} ${merriweather.variable}`}>
       <body>
-        {children}
+        <NuqsAdapter>
+          {children}
+        </NuqsAdapter>
+        <Toaster richColors position="top-center" />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

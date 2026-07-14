@@ -3,19 +3,13 @@
 import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { Howl } from "howler";
-import { ArrowRight, Play, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowRight, Play, Calendar } from "lucide-react";
+import Lightbox from "yet-another-react-lightbox";
+import Captions from "yet-another-react-lightbox/plugins/captions";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
 
-const FacebookIcon = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
 
-const YoutubeIcon = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
-    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.96-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" />
-  </svg>
-);
 import { CloudDivider } from "@/app/components/VietnameseMotifs";
 
 interface ProjectIntroProps {
@@ -98,38 +92,9 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
     };
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (selectedImageIndex === null) return;
-      if (e.key === "Escape") setSelectedImageIndex(null);
-      if (e.key === "ArrowLeft") {
-        setSelectedImageIndex(prev => prev !== null ? (prev - 1 + galleryImages.length) % galleryImages.length : null);
-      }
-      if (e.key === "ArrowRight") {
-        setSelectedImageIndex(prev => prev !== null ? (prev + 1) % galleryImages.length : null);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImageIndex]);
-
   const scrollToGallery = (e: React.MouseEvent) => {
     e.preventDefault();
     galleryRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (selectedImageIndex !== null) {
-      setSelectedImageIndex((selectedImageIndex - 1 + galleryImages.length) % galleryImages.length);
-    }
-  };
-
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (selectedImageIndex !== null) {
-      setSelectedImageIndex((selectedImageIndex + 1) % galleryImages.length);
-    }
   };
 
   return (
@@ -479,136 +444,20 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
       </section>
 
       {/* Lightbox Modal */}
-      {selectedImageIndex !== null && (
-        <div
-          onClick={() => setSelectedImageIndex(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(8px)",
-            padding: "1rem",
-            animation: "fade-in 0.25s ease-out",
-          }}
-        >
-          {/* Close button */}
-          <button
-            onClick={() => setSelectedImageIndex(null)}
-            style={{
-              position: "absolute",
-              top: "1.5rem",
-              right: "1.5rem",
-              background: "rgba(255, 255, 255, 0.15)",
-              border: "none",
-              borderRadius: "50%",
-              width: "44px",
-              height: "44px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#FFF",
-              cursor: "pointer",
-              transition: "background 0.2s",
-              zIndex: 10001,
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"}
-            aria-label="Đóng"
-          >
-            <X size={20} />
-          </button>
-
-          {/* Prev button */}
-          <button
-            onClick={handlePrevImage}
-            style={{
-              position: "absolute",
-              left: "1.5rem",
-              background: "rgba(255, 255, 255, 0.15)",
-              border: "none",
-              borderRadius: "50%",
-              width: "50px",
-              height: "50px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#FFF",
-              cursor: "pointer",
-              transition: "background 0.2s",
-              zIndex: 10000,
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"}
-            aria-label="Ảnh trước"
-          >
-            <ChevronLeft size={24} />
-          </button>
-
-          {/* Image content */}
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: "relative",
-              maxWidth: "90%",
-              maxHeight: "85vh",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "1rem",
-            }}
-          >
-            <Image
-              src={galleryImages[selectedImageIndex].src}
-              alt={galleryImages[selectedImageIndex].alt}
-              width={1200}
-              height={800}
-              unoptimized={true}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "75vh",
-                objectFit: "contain",
-                borderRadius: "12px",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                width: "auto",
-                height: "auto",
-              }}
-            />
-            <div style={{ color: "#FFF", fontSize: "1rem", textAlign: "center", fontWeight: 500, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
-              {galleryImages[selectedImageIndex].title}
-            </div>
-          </div>
-
-          {/* Next button */}
-          <button
-            onClick={handleNextImage}
-            style={{
-              position: "absolute",
-              right: "1.5rem",
-              background: "rgba(255, 255, 255, 0.15)",
-              border: "none",
-              borderRadius: "50%",
-              width: "50px",
-              height: "50px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#FFF",
-              cursor: "pointer",
-              transition: "background 0.2s",
-              zIndex: 10000,
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"}
-            aria-label="Ảnh sau"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </div>
-      )}
+      <Lightbox
+        open={selectedImageIndex !== null}
+        close={() => setSelectedImageIndex(null)}
+        index={selectedImageIndex ?? 0}
+        slides={galleryImages.map(img => ({
+          src: img.src,
+          alt: img.alt,
+          title: img.title
+        }))}
+        plugins={[Captions]}
+        captions={{
+          descriptionTextAlign: "center"
+        }}
+      />
 
       {/* Footer */}
       <footer 
