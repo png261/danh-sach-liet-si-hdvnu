@@ -257,7 +257,8 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             maxWidth: "900px"
           }}
         >
-          Cổng tra cứu thông tin liệt sĩ xã Tứ Kỳ
+          Cổng tra cứu thông tin <br />
+          liệt sĩ xã Tứ Kỳ
         </h1>
 
         {/* Subtext description */}
