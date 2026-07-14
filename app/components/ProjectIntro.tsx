@@ -10,7 +10,7 @@ import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
-import useEmblaCarousel from "embla-carousel-react";
+import Masonry from "react-masonry-css";
 
 
 import { CloudDivider } from "@/app/components/VietnameseMotifs";
@@ -99,12 +99,6 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
   const [gallerySectionRef, gallerySectionInView] = useInView({ triggerOnce: true, threshold: 0.15 });
   const [footerRef, footerInView] = useInView({ triggerOnce: true, threshold: 0.2 });
   
-  // Initialize Embla Carousel for smooth sliding with velocity dragging
-  const [emblaRef] = useEmblaCarousel({
-    align: "start",
-    containScroll: "trimSnaps",
-    dragFree: true
-  });
 
   useEffect(() => {
     const sound = new Howl({
@@ -423,105 +417,68 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
           </h2>
         </motion.div>
 
-        {/* Scrollable Gallery */}
-        <div style={{ position: "relative" }}>
-          {/* Subtle scroll/swipe indicator */}
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            alignItems: "center",
-            marginBottom: "0.75rem", 
-            fontSize: "0.8rem", 
-            color: "var(--text-muted)",
-            padding: "0 0.25rem"
-          }}>
-            <span>Lướt qua trái/phải để xem ({galleryImages.length} ảnh)</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
-              Lướt xem <ArrowRight size={12} />
-            </span>
-          </div>
-
-          {/* Embla Carousel Viewport wrapper */}
-          <div ref={emblaRef} style={{ overflow: "hidden", cursor: "grab" }} className="embla-viewport">
-            <div 
-              className="gallery-scroll-container embla-container"
+        {/* Masonry Gallery */}
+        <Masonry
+          breakpointCols={{ default: 3, 1024: 3, 768: 2, 480: 1 }}
+          className="masonry-grid"
+          columnClassName="masonry-grid-col"
+        >
+          {galleryImages.map((img, index) => (
+            <motion.div
+              key={index}
+              onClick={() => setSelectedImageIndex(index)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={gallerySectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
               style={{
-                display: "flex",
-                gap: "1rem",
-                paddingBottom: "1.5rem",
-                scrollSnapType: "none",
+                borderRadius: "12px",
+                overflow: "hidden",
+                cursor: "pointer",
+                position: "relative",
+                backgroundColor: "#FFF",
+                border: "1px solid #EADFCE",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
+                marginBottom: "1rem",
+                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
+              whileHover={{ y: -4, boxShadow: "0 12px 28px rgba(164, 123, 46, 0.14)" }}
             >
-            {galleryImages.map((img, index) => (
-              <div
-                key={index}
-                onClick={() => setSelectedImageIndex(index)}
+              <Image
+                src={img.src}
+                alt={img.alt}
+                width={400}
+                height={300}
                 style={{
-                  flex: "0 0 auto",
-                  width: "min(360px, 80vw)",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  position: "relative",
-                  backgroundColor: "#FFF",
-                  border: "1px solid #EADFCE",
-                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.03)",
-                  transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                  scrollSnapAlign: "start",
-                  aspectRatio: "1.5",
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 10px 25px rgba(164, 123, 46, 0.12)";
-                  const imageEl = e.currentTarget.querySelector("img");
-                  if (imageEl) imageEl.style.transform = "scale(1.05)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.03)";
-                  const imageEl = e.currentTarget.querySelector("img");
-                  if (imageEl) imageEl.style.transform = "scale(1)";
-                }}
-              >
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  width={350}
-                  height={240}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
-                    display: "block",
-                  }}
-                />
-                <div style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  background: "linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%)",
-                  padding: "1.2rem 1rem 0.8rem",
-                  color: "#FFF",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
+                className="masonry-img"
+              />
+              <div style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)",
+                padding: "2rem 0.9rem 0.75rem",
+                color: "#FFF",
+              }}>
+                <span style={{
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.3,
+                  display: "block",
                 }}>
-                  <span style={{ 
-                    fontSize: "0.85rem", 
-                    fontWeight: 600, 
-                    textShadow: "0 1px 2px rgba(0,0,0,0.6)",
-                    letterSpacing: "0.01em"
-                  }}>
-                    {img.title}
-                  </span>
-                </div>
+                  {img.title}
+                </span>
               </div>
-            ))}
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          ))}
+        </Masonry>
       </section>
 
       {/* Lightbox Modal */}

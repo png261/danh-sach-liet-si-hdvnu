@@ -3938,4 +3938,26 @@ body {
 }
 
 
+/* ====================== MASONRY GALLERY ====================== */
+.masonry-grid {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
 
+.masonry-grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.masonry-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.masonry-grid-col > div:hover .masonry-img {
+  transform: scale(1.04);
+}
