@@ -61,11 +61,17 @@ const wordVariants = {
   }
 };
 
-function CinematicText({ text, style, className, animate = "visible" }: { text: string; style?: React.CSSProperties; className?: string; animate?: string }) {
+function CinematicText({ text, style, className, animate = "visible", delay = 0 }: { text: string; style?: React.CSSProperties; className?: string; animate?: string; delay?: number }) {
   const words = text.split(" ");
   return (
     <motion.span
-      variants={containerVariants}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: { staggerChildren: 0.08, delayChildren: delay }
+        }
+      }}
       initial="hidden"
       animate={animate}
       style={{ display: "inline-flex", flexWrap: "wrap", justifyContent: "center", ...style }}
@@ -265,18 +271,26 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
           className="font-serif"
           style={{ 
             fontSize: "clamp(1.6rem, 6vw, 3.8rem)", 
-            lineHeight: "1.2", 
+            lineHeight: "1.25", 
             letterSpacing: "-1px", 
             color: "var(--foreground)", 
             fontWeight: "normal",
             maxWidth: "900px",
             display: "flex",
-            justifyContent: "center"
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "0.2rem"
           }}
         >
           <CinematicText 
-            text="Cổng tra cứu thông tin liệt sĩ xã Tứ Kỳ" 
+            text="Cổng tra cứu thông tin liệt sĩ" 
             animate={startAnimation ? "visible" : "hidden"}
+          />
+          <CinematicText 
+            text="xã Tứ Kỳ" 
+            animate={startAnimation ? "visible" : "hidden"}
+            delay={0.48} // Bắt đầu chạy sau khi dòng thứ nhất đã gần chạy xong
+            style={{ color: "var(--gold)" }}
           />
         </h1>
 
