@@ -17,6 +17,7 @@ import { List } from "react-window";
 import { useCemeteryStore } from "@/app/hooks/useCemeteryStore";
 import { useSpeechRecognition } from "@/app/hooks/useSpeechRecognition";
 import { AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { LotusMotif, CloudDivider } from "@/app/components/VietnameseMotifs";
 import ProjectIntro from "@/app/components/ProjectIntro";
 import CemeteryDropdown from "@/app/components/CemeteryDropdown";
@@ -99,6 +100,19 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
   const quickSearchRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Voice Search Error Handling with custom toasts
+  const handleVoiceSearchError = useCallback((error: string) => {
+    if (error === "network") {
+      toast.error("Không thể kết nối dịch vụ giọng nói của trình duyệt (Google/Apple). Vui lòng kiểm tra lại kết nối mạng!");
+    } else if (error === "not-allowed") {
+      toast.error("Quyền truy cập Microphone bị từ chối. Vui lòng cấp quyền micro trong cài đặt trình duyệt!");
+    } else if (error === "no-speech") {
+      toast.warning("Không nghe rõ giọng nói. Vui lòng thử lại!");
+    } else {
+      toast.error("Lỗi nhận diện giọng nói: " + error);
+    }
+  }, []);
+
   // Speech Recognition for Header Quick Search
   const {
     isListening: isListeningQuick,
@@ -108,7 +122,7 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
   } = useSpeechRecognition((text) => {
     setQuickSearch(text);
     setIsQuickSearchFocused(true);
-  });
+  }, handleVoiceSearchError);
 
   // Speech Recognition for Advanced Filter Search
   const {
@@ -118,7 +132,7 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
     isSupported: isSupportedAdvanced
   } = useSpeechRecognition((text) => {
     setSearchName(text);
-  });
+  }, handleVoiceSearchError);
 
   // URL ?liet-si= query param — nuqs tự đồng bộ 2 chiều với URL, không cần useEffect thủ công
   const [martyrIdParam, setMartyrIdParam] = useQueryState(

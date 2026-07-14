@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-export function useSpeechRecognition(onResult: (text: string) => void) {
+export function useSpeechRecognition(onResult: (text: string) => void, onError?: (error: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
 
@@ -26,12 +26,13 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
         rec.onerror = (event: any) => {
           console.error("Speech recognition error:", event.error);
           setIsListening(false);
+          if (onError) onError(event.error);
         };
 
         recognitionRef.current = rec;
       }
     }
-  }, [onResult]);
+  }, [onResult, onError]);
 
   const startListening = useCallback(() => {
     if (recognitionRef.current) {
