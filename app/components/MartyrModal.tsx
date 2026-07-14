@@ -7,9 +7,9 @@ import { LotusMotif } from "@/app/components/VietnameseMotifs";
 import { useMartyrTTS } from "@/app/hooks/useMartyrTTS";
 import Equalizer from "@/app/components/Equalizer";
 import { Modal } from "react-responsive-modal";
-import { QRCodeSVG } from "qrcode.react";
 import "react-responsive-modal/styles.css";
 import { getVietnameseLunarDateString } from "@/app/utils/lunar";
+import StyledQRCode from "@/app/components/StyledQRCode";
 
 interface Props {
   martyr: Martyr;
@@ -292,8 +292,8 @@ export default function MartyrModal({ martyr, onClose, onLocate }: Props) {
         </div>
 
         <div className="print-footer">
-          <div className="print-qr-section">
-            <QRCodeSVG 
+          <div className="print-qr-section" style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <StyledQRCode 
               value={typeof window !== "undefined"
                 ? `${window.location.origin}${window.location.pathname}?liet-si=${martyr.id}`
                 : `https://nghiatrangtuky.vercel.app/[cemetery]?liet-si=${martyr.id}`} 

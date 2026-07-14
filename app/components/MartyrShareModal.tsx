@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, forwardRef } from "react";
 import { Loader2, Download, Link2, Check } from "lucide-react";
 import { useEventListener, useCopyToClipboard } from "usehooks-ts";
-import { QRCodeSVG } from "qrcode.react";
 import { FacebookShareButton } from "react-share";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone } from "@/app/lib/martyrUtils";
@@ -11,6 +10,7 @@ import { LotusMotif } from "@/app/components/VietnameseMotifs";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
 import { getVietnameseLunarDateString } from "@/app/utils/lunar";
+import StyledQRCode from "@/app/components/StyledQRCode";
 
 interface MartyrShareModalProps {
   martyr: Martyr;
@@ -117,14 +117,10 @@ const MemorialCard = forwardRef<HTMLDivElement, MemorialCardProps>(({
       {/* Footer Section */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "2px solid #EADFCE", paddingTop: "1rem", width: "100%", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{ backgroundColor: "#FFFFFF", padding: "6px", borderRadius: "6px", border: "1px solid #EADFCE" }}>
-            <QRCodeSVG
+          <div style={{ backgroundColor: "#FFFFFF", padding: "6px", borderRadius: "6px", border: "1px solid #EADFCE", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <StyledQRCode
               value={shareUrl}
               size={65}
-              bgColor={"#FFFFFF"}
-              fgColor={"#9B1C26"}
-              level={"M"}
-              includeMargin={false}
             />
           </div>
           <div>
