@@ -1,7 +1,8 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, useTransition } from "react";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Search, RotateCcw, MapPin, Calendar, Map, Info, ChevronLeft, ChevronRight, Crosshair, Activity, ArrowLeft, Filter, X, User, Grid } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +18,7 @@ import CemeterySelectionModal from "@/app/components/CemeterySelectionModal";
 import BackgroundMusic from "@/app/components/BackgroundMusic";
 import CemeteryMap from "@/app/components/CemeteryMap";
 import MartyrBottomCard from "@/app/components/MartyrBottomCard";
+import MartyrShareModal from "@/app/components/MartyrShareModal";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
 
@@ -40,9 +42,10 @@ const CEMETERY_TO_SLUG: Record<string, string> = {
 
 interface CemeteryClientProps {
   initialCemeterySlug?: string;
+  initialMartyrs?: Martyr[];
 }
 
-export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientProps) {
+export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: CemeteryClientProps) {
 
   // ── Page Loader state ────────────────────────────────────────────────────────
   const [pageLoading, setPageLoading] = useState(true);
@@ -66,11 +69,13 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFilterModalOpen,    setIsFilterModalOpen]    = useState(false);
   const [isCemeteryModalOpen,  setIsCemeteryModalOpen]  = useState(false);
+  const [isShareModalOpen,     setIsShareModalOpen]     = useState(false);
   const [quickSearch,          setQuickSearch]          = useState("");
   const [isQuickSearchFocused, setIsQuickSearchFocused] = useState(false);
 
   const graveGridRef = useRef<HTMLDivElement>(null);
   const quickSearchRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
 
   // ── Derived data ─────────────────────────────────────────────────────────────
   const zoneCounts = useMemo(() => computeZoneCounts(martyrs), [martyrs]);
@@ -148,10 +153,10 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
         <div className="loader-container">
           <div className="loader-logos">
             <div className="loader-logo-item">
-              <img src="/logo_svtn.webp" alt="Logo Đội SVTN Hải Dương" className="loader-logo-img" />
+              <Image src="/logo_svtn.webp" alt="Logo Đội SVTN Hải Dương" className="loader-logo-img" width={60} height={60} style={{ objectFit: "contain" }} />
             </div>
             <div className="loader-logo-item">
-              <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" className="loader-logo-img" />
+              <Image src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" className="loader-logo-img" width={60} height={60} style={{ objectFit: "contain" }} />
             </div>
           </div>
           
@@ -162,7 +167,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
           
           {/* Spin traditional Vietnamese motif */}
           <div className="loader-spinner-wrapper">
-            <img 
+            <Image 
               src="https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/trong_dong.svg" 
               alt="Trống đồng Đông Sơn" 
               width={120}
@@ -200,7 +205,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
     setQuickSearch("");
     setIsQuickSearchFocused(false);
     handleLocateMartyrGrave(martyr);
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Side effects ─────────────────────────────────────────────────────────────
   // Synchronize initial selection from URL pathname on mount
@@ -222,6 +227,25 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
       return;
     }
 
+    // Nếu nghĩa trang được chọn khớp với prop initialCemeterySlug và có initialMartyrs, dùng luôn để tránh client-side API fetch!
+    const initialCemName = SLUG_TO_CEMETERY[initialCemeterySlug?.toLowerCase() ?? ""];
+    if (initialCemName === selectedCemetery && initialMartyrs && initialMartyrs.length > 0) {
+      setMartyrs(initialMartyrs);
+
+      // Tự động định vị từ liên kết sâu nếu có query parameter martyr
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        const martyrId = searchParams.get("martyr");
+        if (martyrId) {
+          const matched = initialMartyrs.find(m => m.id === martyrId);
+          if (matched) {
+            handleLocateMartyrGrave(matched);
+          }
+        }
+      }
+      return;
+    }
+
     setDataLoading(true);
     const supabase = createClient();
     supabase
@@ -232,11 +256,24 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
         if (error || !data) {
           setMartyrs([]);
         } else {
-          setMartyrs(data.map(m => ({ ...m, cemetery: m.cemetery.normalize("NFC") })));
+          const loadedMartyrs = data.map(m => ({ ...m, cemetery: m.cemetery.normalize("NFC") }));
+          setMartyrs(loadedMartyrs);
+
+          // Tự động định vị từ liên kết sâu nếu có query parameter martyr
+          if (typeof window !== "undefined") {
+            const searchParams = new URLSearchParams(window.location.search);
+            const martyrId = searchParams.get("martyr");
+            if (martyrId) {
+              const matched = loadedMartyrs.find(m => m.id === martyrId);
+              if (matched) {
+                handleLocateMartyrGrave(matched);
+              }
+            }
+          }
         }
         setDataLoading(false);
       });
-  }, [selectedCemetery]);
+  }, [selectedCemetery, initialMartyrs, initialCemeterySlug]);
 
   // Sync state changes back to URL pathname
   useEffect(() => {
@@ -254,6 +291,37 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
 
   // Reset zone & page when cemetery changes
   useEffect(() => { setSelectedZone(""); }, [selectedCemetery]);
+
+  // Đồng bộ hóa selectedCemetery khi prop initialCemeterySlug thay đổi (ví dụ khi chuyển hướng trang)
+  useEffect(() => {
+    if (initialCemeterySlug) {
+      const cemeteryName = SLUG_TO_CEMETERY[initialCemeterySlug.toLowerCase()];
+      if (cemeteryName && cemeteryName !== selectedCemetery) {
+        setSelectedCemetery(cemeteryName);
+      }
+    }
+  }, [initialCemeterySlug]);
+
+  // Đồng bộ hóa selectedMartyr lên URL query string
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const currentId = params.get("martyr") || "";
+      const selectedId = selectedMartyr?.id || "";
+
+      if (selectedId !== currentId) {
+        if (selectedId) {
+          params.set("martyr", selectedId);
+        } else {
+          params.delete("martyr");
+        }
+        
+        const newSearch = params.toString();
+        const nextPath = newSearch ? `${window.location.pathname}?${newSearch}` : window.location.pathname;
+        window.history.pushState(null, "", nextPath);
+      }
+    }
+  }, [selectedMartyr]);
 
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
@@ -289,7 +357,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
           <CemeterySelectionModal
             onClose={() => setIsCemeteryModalOpen(false)}
             onSelect={(cem) => {
-              setSelectedCemetery(cem);
+              startTransition(() => {
+                setSelectedCemetery(cem);
+              });
               setIsCemeteryModalOpen(false);
             }}
           />
@@ -303,7 +373,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
     <>
       {renderLoader()}
       <BackgroundMusic />
-      <div className="app-layout-root">
+      <div className={`app-layout-root${isPending ? " layout-pending" : ""}`}>
       <header className="app-header">
         {/* Left: Logos + Title */}
         <div className="header-left">
@@ -315,9 +385,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
               rel="noopener noreferrer" 
               className="logo-link"
             >
-              <img src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" className="logo-img" />
+              <Image src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" className="logo-img" width={40} height={40} style={{ objectFit: "contain" }} />
             </a>
-            <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" className="logo-img" />
+            <Image src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" className="logo-img" width={40} height={40} style={{ objectFit: "contain" }} />
           </div>
 
           {/* Vertical line separator */}
@@ -375,7 +445,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
                       key={m.id}
                       className="quick-search-item"
                       style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                      onClick={() => { handleOpenDetails(m); setIsQuickSearchFocused(false); }}
+                      onClick={() => { handleLocateMartyrGrave(m); setIsQuickSearchFocused(false); setQuickSearch(""); }}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="quick-search-item-name">{m.name}</div>
@@ -449,6 +519,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
           martyr={selectedMartyr}
           onClose={handleCloseBottomCard}
           onOpenFullModal={handleOpenFullModalFromCard}
+          onOpenShareModal={() => setIsShareModalOpen(true)}
           onLocate={handleLocateMartyrGrave}
         />
       )}
@@ -463,6 +534,14 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
             setIsBottomCardOpen(true);
           }}
           onLocate={handleLocateMartyrGrave}
+        />
+      )}
+
+      {/* ── Share modal ────────────────────────────────────────────────────────── */}
+      {isShareModalOpen && selectedMartyr && (
+        <MartyrShareModal
+          martyr={selectedMartyr}
+          onClose={() => setIsShareModalOpen(false)}
         />
       )}
 
@@ -606,7 +685,7 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
                   filteredMartyrs.map((m) => (
                     <div
                       key={m.id}
-                      onClick={() => handleOpenDetails(m)}
+                      onClick={() => { handleLocateMartyrGrave(m); setIsFilterModalOpen(false); }}
                       className="martyr-list-card"
                     >
                       <div style={{ color: "var(--primary-red)", fontWeight: 700, fontSize: "0.95rem" }}>{m.name}</div>
@@ -661,7 +740,9 @@ export default function CemeteryClient({ initialCemeterySlug }: CemeteryClientPr
         <CemeterySelectionModal
           onClose={() => setIsCemeteryModalOpen(false)}
           onSelect={(cem) => {
-            setSelectedCemetery(cem);
+            startTransition(() => {
+              setSelectedCemetery(cem);
+            });
             setIsCemeteryModalOpen(false);
           }}
           selectedValue={selectedCemetery}

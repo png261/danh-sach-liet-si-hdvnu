@@ -1,8 +1,27 @@
 import type { Metadata } from "next";
 import CemeteryClient from "../CemeteryClient";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import type { Martyr } from "@/app/types/martyr";
+import { cacheLife } from "next/cache";
+
+export const unstable_instant = { 
+  prefetch: "static",
+  unstable_disableValidation: true,
+};
 
 type Props = {
   params: Promise<{ cemetery: string }>;
+};
+
+const SLUG_TO_CEMETERY: Record<string, string> = {
+  "tu-ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
+  "tu_ky": "Nghĩa trang liệt sĩ Tứ Kỳ",
+  "minh-duc": "Nghĩa trang liệt sĩ Minh Đức",
+  "minh_duc": "Nghĩa trang liệt sĩ Minh Đức",
+  "quang-khai": "Nghĩa trang liệt sĩ Quang Khải",
+  "quang_khai": "Nghĩa trang liệt sĩ Quang Khải",
+  "quang-phuc": "Nghĩa trang liệt sĩ xã Quang Phục",
+  "quang_phuc": "Nghĩa trang liệt sĩ xã Quang Phục",
 };
 
 // Define static parameters for static site generation
@@ -67,8 +86,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// Cached function to fetch martyrs on the server
+async function fetchMartyrs(cemeteryName: string): Promise<Martyr[]> {
+  "use cache";
+  cacheLife("hours"); // Cache the query result for hours
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+
+  const { data } = await supabase
+    .from("martyrs")
+    .select("*")
+    .eq("cemetery", cemeteryName);
+
+  if (data) {
+    return data.map((m: Martyr) => ({ ...m, cemetery: m.cemetery.normalize("NFC") }));
+  }
+  return [];
+}
+
 export default async function Page({ params }: Props) {
   const resolvedParams = await params;
   const cemeterySlug = resolvedParams.cemetery;
-  return <CemeteryClient initialCemeterySlug={cemeterySlug} />;
+  const cemeteryName = SLUG_TO_CEMETERY[cemeterySlug?.toLowerCase() ?? ""];
+
+  let martyrs: Martyr[] = [];
+  if (cemeteryName) {
+    martyrs = await fetchMartyrs(cemeteryName);
+  }
+
+  return (
+    <CemeteryClient 
+      initialCemeterySlug={cemeterySlug} 
+      initialMartyrs={martyrs} 
+    />
+  );
 }

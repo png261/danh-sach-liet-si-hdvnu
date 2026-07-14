@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-export const runtime = "nodejs";
+
 
 export async function GET(request: Request) {
   try {

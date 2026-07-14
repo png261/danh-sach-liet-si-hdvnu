@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
+import { Howl } from "howler";
 import { ArrowRight, Play, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const FacebookIcon = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -50,65 +52,49 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const audio = new Audio("https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/intro_bgm.mp3");
-    audio.loop = true;
-    audio.volume = 0;
-    
-    let fadeInterval: NodeJS.Timeout;
-    const duration = 2000;
-    const step = 50;
-    const targetVolume = 0.55; 
-    const volumeIncrement = targetVolume / (duration / step);
-
-    const startFadeIn = () => {
-      clearInterval(fadeInterval);
-      fadeInterval = setInterval(() => {
-        if (audio.volume < targetVolume) {
-          audio.volume = Math.min(targetVolume, audio.volume + volumeIncrement);
-        } else {
-          clearInterval(fadeInterval);
-        }
-      }, step);
-    };
+    const sound = new Howl({
+      src: ["https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/intro_bgm.mp3"],
+      html5: false,
+      loop: true,
+      volume: 0
+    });
 
     const tryPlay = () => {
-      audio.play()
-        .then(() => {
-          startFadeIn();
-          removeListeners();
-        })
-        .catch((err) => {
-          console.log("Audio play blocked, waiting for interaction:", err);
-        });
+      if (sound.state() === "unloaded") {
+        sound.load();
+      }
+      if (!sound.playing()) {
+        sound.play();
+        sound.fade(sound.volume(), 0.55, 2000);
+      }
     };
+
+    tryPlay();
 
     const handleInteraction = () => {
       tryPlay();
-    };
-
-    const addListeners = () => {
-      window.addEventListener("click", handleInteraction);
-      window.addEventListener("touchstart", handleInteraction);
+      removeListeners();
     };
 
     const removeListeners = () => {
       window.removeEventListener("click", handleInteraction);
       window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("mousedown", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+      window.removeEventListener("pointerdown", handleInteraction);
     };
 
-    audio.play()
-      .then(() => {
-        startFadeIn();
-      })
-      .catch(() => {
-        addListeners();
-      });
+    if (!sound.playing()) {
+      window.addEventListener("click", handleInteraction);
+      window.addEventListener("touchstart", handleInteraction);
+      window.addEventListener("mousedown", handleInteraction);
+      window.addEventListener("keydown", handleInteraction);
+      window.addEventListener("pointerdown", handleInteraction);
+    }
 
     return () => {
       removeListeners();
-      clearInterval(fadeInterval);
-      audio.pause();
-      audio.src = "";
+      sound.unload();
     };
   }, []);
 
@@ -229,14 +215,14 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
             onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
           >
-            <img src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" className="intro-logo-img" style={{ height: "60px", width: "60px", objectFit: "contain", flexShrink: 0 }} />
+            <Image src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" className="intro-logo-img" width={60} height={60} style={{ objectFit: "contain", flexShrink: 0 }} />
             <div className="intro-badge-text" style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
               <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--primary-red)", letterSpacing: "0.02em", lineHeight: "1.2" }}>Đội Sinh viên tình nguyện Hải Dương</span>
               <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--primary-red)", letterSpacing: "0.02em", lineHeight: "1.2" }}>tại Đại học Quốc gia Hà Nội</span>
             </div>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-            <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã" className="intro-logo-img" style={{ height: "60px", width: "60px", objectFit: "contain", flexShrink: 0 }} />
+            <Image src="/logo_doan_xa.webp" alt="Logo Đoàn xã" className="intro-logo-img" width={60} height={60} style={{ objectFit: "contain", flexShrink: 0 }} />
             <span className="intro-badge-text" style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--primary-red)", letterSpacing: "0.02em" }}>Đoàn Xã Tứ Kỳ</span>
           </div>
         </div>
@@ -451,9 +437,11 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
                   if (imageEl) imageEl.style.transform = "scale(1)";
                 }}
               >
-                <img
+                <Image
                   src={img.src}
                   alt={img.alt}
+                  width={350}
+                  height={240}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -572,15 +560,20 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
               gap: "1rem",
             }}
           >
-            <img
+            <Image
               src={galleryImages[selectedImageIndex].src}
               alt={galleryImages[selectedImageIndex].alt}
+              width={1200}
+              height={800}
+              unoptimized={true}
               style={{
                 maxWidth: "100%",
                 maxHeight: "75vh",
                 objectFit: "contain",
                 borderRadius: "12px",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                width: "auto",
+                height: "auto",
               }}
             />
             <div style={{ color: "#FFF", fontSize: "1rem", textAlign: "center", fontWeight: 500, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
@@ -637,9 +630,9 @@ export default function ProjectIntro({ onEnterSearch }: ProjectIntroProps) {
             onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.08)"}
             onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
           >
-            <img src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" style={{ height: "54px", width: "54px", objectFit: "contain" }} />
+            <Image src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" width={54} height={54} style={{ objectFit: "contain" }} />
           </a>
-          <img src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" style={{ height: "54px", width: "54px", objectFit: "contain" }} />
+          <Image src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" width={54} height={54} style={{ objectFit: "contain" }} />
         </div>
         <p style={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>
           Cổng thông tin tri ân anh hùng liệt sĩ trên địa bàn xã Tứ Kỳ

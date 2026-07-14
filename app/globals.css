@@ -1080,6 +1080,12 @@ body {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.layout-pending {
+  opacity: 0.65;
+  pointer-events: none;
 }
 
 .split-layout-container {
@@ -1345,6 +1351,7 @@ body {
   box-shadow: inset 0 0 40px rgba(164,123,46,0.06);
   aspect-ratio: 1000 / 562;
   overflow: hidden;
+  touch-action: none;
 }
 
 .map-card-header {
@@ -3401,7 +3408,8 @@ body {
 
   .bottom-card-btn-speak:hover:not(:disabled),
   .bottom-card-btn-locate:hover,
-  .bottom-card-btn-detail:hover {
+  .bottom-card-btn-detail:hover,
+  .bottom-card-btn-share:hover {
     background: #FFF3D6;
     border-color: var(--gold);
     color: #8A6520;
@@ -3417,7 +3425,8 @@ body {
 /* 3 nút thao tác thông tin (Nghe, Sơ đồ, Chi tiết) dùng chung màu nền cream viền vàng kim */
 .bottom-card-btn-speak,
 .bottom-card-btn-locate,
-.bottom-card-btn-detail {
+.bottom-card-btn-detail,
+.bottom-card-btn-share {
   background: #FAF6EE;
   color: var(--gold);
   border-color: rgba(164, 123, 46, 0.45);
@@ -3537,6 +3546,23 @@ body {
   padding: 1.5rem !important;
 }
 
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.custom-modal-container,
+.custom-modal-container-detail,
+.custom-modal-container-filter {
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
 .custom-modal-overlay {
   background: rgba(35, 30, 26, 0.7) !important;
   backdrop-filter: blur(12px) !important;
@@ -3649,5 +3675,125 @@ body {
     margin: 0 !important;
   }
 }
+
+/* Custom Cemetery Grid & Grave Numbers Styling */
+.grave-number-text {
+  fill: var(--text-muted) !important;
+  stroke: #FAF8F2 !important;
+  stroke-width: 1.2px !important;
+  paint-order: stroke fill !important;
+  font-family: var(--font-sans);
+  transition: fill 0.15s ease, opacity 0.15s ease;
+  opacity: 0.8;
+}
+
+.grave-cell-map.selected .grave-number-text {
+  fill: var(--primary-red) !important;
+  stroke: #FFF806 !important;
+  stroke-width: 1.2px !important;
+  opacity: 1 !important;
+}
+
+.grave-cell-map:hover .grave-number-text {
+  fill: var(--primary-red) !important;
+  opacity: 1 !important;
+}
+
+.map-grid-lines line {
+  transition: opacity 0.3s ease;
+}
+
+/* ── QR Sharing Responsive Style ── */
+@media (max-width: 480px) {
+  .share-grave-content {
+    flex-direction: column !important;
+    text-align: center;
+    align-items: center !important;
+  }
+}
+
+/* Modal chia sẻ thông tin & tải phiếu */
+.custom-modal-container-share {
+  position: relative !important;
+  background-color: #FCFAF6 !important;
+  border: 2px solid #EADFCE !important;
+  border-radius: 16px !important;
+  width: 90% !important;
+  max-width: 480px !important;
+  box-shadow: 0 20px 50px rgba(45, 39, 34, 0.25) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  max-height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ── Responsive Memorial Card Preview ── */
+.memorial-card-preview-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+  position: relative;
+  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  user-select: none;
+}
+
+.memorial-card-preview-inner {
+  width: 600px;
+  height: 820px;
+  background-color: #FCFAF6;
+  border: 12px double #C2A267;
+  padding: 2.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #2D2722;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  flex-shrink: 0;
+  transform-origin: top center;
+}
+
+@media (max-width: 359px) {
+  .memorial-card-preview-wrapper {
+    height: 380px;
+  }
+  .memorial-card-preview-inner {
+    transform: scale(0.46);
+  }
+}
+
+@media (min-width: 360px) and (max-width: 399px) {
+  .memorial-card-preview-wrapper {
+    height: 426px;
+  }
+  .memorial-card-preview-inner {
+    transform: scale(0.52);
+  }
+}
+
+@media (min-width: 400px) and (max-width: 479px) {
+  .memorial-card-preview-wrapper {
+    height: 476px;
+  }
+  .memorial-card-preview-inner {
+    transform: scale(0.58);
+  }
+}
+
+@media (min-width: 480px) {
+  .memorial-card-preview-wrapper {
+    height: 533px;
+  }
+  .memorial-card-preview-inner {
+    transform: scale(0.65);
+  }
+}
+
 
 

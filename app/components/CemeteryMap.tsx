@@ -1,7 +1,7 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone, groupMartyrsByRow } from "@/app/lib/martyrUtils";
@@ -39,11 +39,19 @@ export default function CemeteryMap({
   // --- Tooltip & Interaction State ---
   const [hoveredMartyr, setHoveredMartyr] = useState<Martyr | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const [showGrid] = useState(true);
+
+  // Strip leading zeros if followed by a number
+  const formatGraveNo = (no: string) => {
+    const trimmed = (no || "").trim();
+    return trimmed.replace(/^0+(?=\d)/, "");
+  };
 
   // --- Responsive / Mobile detection & Auto-Centering ---
   const [isMobile, setIsMobile] = useState(false);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const lastClickRef = useRef<{ time: number; martyrId: string | null }>({ time: 0, martyrId: null });
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -156,6 +164,40 @@ export default function CemeteryMap({
     };
   };
 
+  const handleGraveClick = useCallback((e: React.MouseEvent, martyr: Martyr, zoneName: string) => {
+    e.stopPropagation();
+    onSelectZone(zoneName);
+    onSelectMartyr(martyr);
+
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    const prev = lastClickRef.current;
+
+    if (prev.martyrId === martyr.id && now - prev.time < DOUBLE_TAP_DELAY) {
+      if (transformRef.current) {
+        const coords = getMartyrCoordinates(martyr.id);
+        if (coords) {
+          const wrapper = mapContainerRef.current;
+          if (wrapper) {
+            const W = wrapper.clientWidth;
+            const H = wrapper.clientHeight;
+            const s = isMobile ? 3.5 : 2.5;
+            const scaleFactor = W / 1080;
+            const lx = (coords.x + 40) * scaleFactor;
+            const ly = (coords.y + 25) * scaleFactor;
+            const tx = (W / 2) - (lx * s);
+            const ty = (isMobile ? (H / 4) : (H / 2.2)) - (ly * s);
+            
+            transformRef.current.setTransform(tx, ty, s, 500);
+          }
+        }
+      }
+      lastClickRef.current = { time: 0, martyrId: null };
+    } else {
+      lastClickRef.current = { time: now, martyrId: martyr.id };
+    }
+  }, [isMobile, getMartyrCoordinates, onSelectZone, onSelectMartyr]);
+
   // Programmatically zoom and center on a selected martyr's grave on mobile
   useEffect(() => {
     if (!selectedMartyrId || !isMobile) return;
@@ -182,7 +224,7 @@ export default function CemeteryMap({
     }, 250); // Delay to let search panels/modals close and layout settle
 
     return () => clearTimeout(timer);
-  }, [selectedMartyrId, isMobile]);
+  }, [selectedMartyrId, isMobile, getMartyrCoordinates]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%", height: "100%" }}>
@@ -196,6 +238,13 @@ export default function CemeteryMap({
         limitToBounds={true}
         centerOnInit={true}
         centerZoomedOut={true}
+        doubleClick={{ disabled: true }}
+        panning={{
+          velocityDisabled: false,
+        }}
+        wheel={{
+          step: 0.05,
+        }}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <div ref={mapContainerRef} className="cemetery-map-container" style={{ position: "relative" }}>
@@ -416,6 +465,43 @@ export default function CemeteryMap({
 
               return (
                 <g key={zoneName}>
+                  {/* Grid Lines Overlay */}
+                  {showGrid && (
+                    <g className="map-grid-lines" opacity="0.35" style={{ pointerEvents: "none" }}>
+                      {/* Vertical lines */}
+                      {Array.from({ length: maxCols + 1 }).map((_, cIdx) => {
+                        const x = xStart + cIdx * (width / maxCols);
+                        return (
+                          <line
+                            key={`grid-v-${cIdx}`}
+                            x1={x}
+                            y1={yStart}
+                            x2={x}
+                            y2={yStart + height}
+                            stroke="var(--gold)"
+                            strokeWidth="0.5"
+                            strokeDasharray="2,2"
+                          />
+                        );
+                      })}
+                      {/* Horizontal lines */}
+                      {Array.from({ length: R + 1 }).map((_, rIdx) => {
+                        const y = yStart + rIdx * (height / R);
+                        return (
+                          <line
+                            key={`grid-h-${rIdx}`}
+                            x1={xStart}
+                            y1={y}
+                            x2={xStart + width}
+                            y2={y}
+                            stroke="var(--gold)"
+                            strokeWidth="0.5"
+                            strokeDasharray="2,2"
+                          />
+                        );
+                      })}
+                    </g>
+                  )}
 
 
                   {/* Zone title label */}
@@ -502,11 +588,7 @@ export default function CemeteryMap({
                       return (
                         <g
                           key={martyr.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectZone(zoneName);
-                            onSelectMartyr(martyr);
-                          }}
+                          onClick={(e) => handleGraveClick(e, martyr, zoneName)}
                           onPointerOver={(e) => handlePointerOverGrave(e, martyr)}
                           onPointerMove={handlePointerMoveGrave}
                           onPointerOut={handlePointerOutGrave}
@@ -526,6 +608,25 @@ export default function CemeteryMap({
                               filter: isSelected ? "drop-shadow(0px 0px 4px rgba(255, 248, 6, 0.95))" : "none"
                             }}
                           />
+
+                          {/* 2. Grave number text overlay */}
+                          {showGrid && (
+                            <text
+                              x={cellX + cellW / 2}
+                              y={cellY + cellH / 2}
+                              className="grave-number-text"
+                              style={{
+                                fontSize: formatGraveNo(martyr.grave_no).length > 3 ? "4.5px" : "6px",
+                                fontWeight: "700",
+                                textAnchor: "middle",
+                                dominantBaseline: "central",
+                                pointerEvents: "none",
+                                userSelect: "none"
+                              }}
+                            >
+                              {formatGraveNo(martyr.grave_no)}
+                            </text>
+                          )}
                         </g>
                       );
                     });

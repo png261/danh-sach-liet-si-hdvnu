@@ -1,6 +1,7 @@
 "use client";
 
-import { X, MapPin, Search } from "lucide-react";
+import { X, Search } from "lucide-react";
+import Image from "next/image";
 import { LotusMotif } from "@/app/components/VietnameseMotifs";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
@@ -109,10 +110,13 @@ export default function CemeterySelectionModal({
               >
                 {/* Image Section */}
                 <div className="cem-card-img-wrapper">
-                  <img
+                  <Image
                     src={cem.image}
                     alt={cem.fullName}
                     className="cem-card-img"
+                    width={400}
+                    height={250}
+                    style={{ objectFit: "cover" }}
                   />
                   {isSelected && (
                     <div className="cem-card-selected-badge">
@@ -125,10 +129,6 @@ export default function CemeterySelectionModal({
                 <div className="cem-card-body">
                   <h3 className="cem-card-name font-serif">{cem.fullName}</h3>
                   <div className="cem-card-meta">
-                    <span className="cem-card-meta-item">
-                      <MapPin size={13} className="cem-card-icon" />
-                      Tứ Kỳ, Hải Dương
-                    </span>
                     <span className="cem-card-meta-item">
                       <Search size={13} className="cem-card-icon" />
                       {count} phần mộ

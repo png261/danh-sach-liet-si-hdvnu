@@ -1,41 +1,67 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { Howl } from "howler";
+
+// Declare global properties for TypeScript compatibility
+declare global {
+  interface Window {
+    bgMusic?: Howl;
+  }
+}
 
 export default function BackgroundMusic() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
   useEffect(() => {
-    const audio = new Audio("https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3");
-    audio.loop = true;
-    audio.volume = 0.18;
-    audioRef.current = audio;
+    const sound = new Howl({
+      src: ["https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3"],
+      html5: false,
+      loop: true,
+      volume: 0.18
+    });
 
-    // Try auto-play immediately; if blocked, play on first user interaction
+    if (typeof window !== "undefined") {
+      window.bgMusic = sound;
+    }
+
     const tryPlay = () => {
-      audio.play().catch(() => {});
+      if (sound.state() === "unloaded") {
+        sound.load();
+      }
+      if (!sound.playing()) {
+        sound.play();
+      }
     };
 
     tryPlay();
 
-    // Fallback: play on first touch/click anywhere on the page
+    // Fallback: Safari/iOS blocks autoplay until first interaction
     const onFirstInteraction = () => {
       tryPlay();
-      document.removeEventListener("click", onFirstInteraction);
-      document.removeEventListener("touchstart", onFirstInteraction);
-      document.removeEventListener("keydown", onFirstInteraction);
+      removeListeners();
     };
 
-    document.addEventListener("click", onFirstInteraction);
-    document.addEventListener("touchstart", onFirstInteraction);
-    document.addEventListener("keydown", onFirstInteraction);
-
-    return () => {
-      audio.pause();
-      audio.src = "";
+    const removeListeners = () => {
       document.removeEventListener("click", onFirstInteraction);
       document.removeEventListener("touchstart", onFirstInteraction);
       document.removeEventListener("keydown", onFirstInteraction);
+      document.removeEventListener("mousedown", onFirstInteraction);
+      document.removeEventListener("pointerdown", onFirstInteraction);
+    };
+
+    if (!sound.playing()) {
+      document.addEventListener("click", onFirstInteraction);
+      document.addEventListener("touchstart", onFirstInteraction);
+      document.addEventListener("keydown", onFirstInteraction);
+      document.addEventListener("mousedown", onFirstInteraction);
+      document.addEventListener("pointerdown", onFirstInteraction);
+    }
+
+    return () => {
+      sound.unload();
+      if (typeof window !== "undefined") {
+        window.bgMusic = undefined;
+      }
+      removeListeners();
     };
   }, []);
 
