@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { NuqsAdapter } from "nuqs/adapters/next";
+import NextTopLoader from "nextjs-toploader";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-primary",
@@ -59,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${beVietnamPro.variable} ${merriweather.variable}`}>
       <body>
+        <NextTopLoader color="#C2A267" height={3} showSpinner={false} shadow="0 0 10px #C2A267,0 0 5px #C2A267" />
         <NuqsAdapter>
           {children}
         </NuqsAdapter>
