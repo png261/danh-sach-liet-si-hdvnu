@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import useSound from "use-sound";
-import type { Howl } from "howler";
-
+import { useEffect, useRef } from "react";
+import { Howl } from "howler";
 import { useCemeteryStore } from "@/app/hooks/useCemeteryStore";
 
 // Expose the underlying Howl instance on window so useMartyrTTS
@@ -14,45 +12,70 @@ declare global {
 
 export default function BackgroundMusic() {
   const isMusicMuted = useCemeteryStore((state) => state.isMusicMuted);
+  const soundRef = useRef<Howl | null>(null);
 
-  const [play, { sound }] = useSound(
-    "https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3",
-    { volume: 0.18, loop: true, interrupt: false }
-  );
-
-  // Expose Howl instance for external fade control (e.g. useMartyrTTS)
   useEffect(() => {
-    if (sound) window.bgMusic = sound as unknown as Howl;
-    return () => { 
-      if (sound) {
-        sound.stop();
+    // Create Howl instance
+    const sound = new Howl({
+      src: ["https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3"],
+      html5: true,
+      loop: true,
+      volume: 0.18,
+      autoplay: !isMusicMuted
+    });
+    soundRef.current = sound;
+    sound.mute(isMusicMuted);
+    window.bgMusic = sound;
+
+    const tryPlay = () => {
+      if (sound.state() === "unloaded") {
+        sound.load();
       }
-      window.bgMusic = undefined; 
+      if (!sound.playing() && !isMusicMuted) {
+        sound.play();
+      }
     };
-  }, [sound]);
+
+    tryPlay();
+
+    const handleInteraction = () => {
+      tryPlay();
+      removeListeners();
+    };
+
+    const removeListeners = () => {
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("mousedown", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+      window.removeEventListener("pointerdown", handleInteraction);
+    };
+
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("touchstart", handleInteraction);
+    window.addEventListener("mousedown", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+    window.addEventListener("pointerdown", handleInteraction);
+
+    return () => {
+      removeListeners();
+      sound.stop();
+      sound.unload();
+      soundRef.current = null;
+      window.bgMusic = undefined;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle mute/unmute
   useEffect(() => {
-    if (sound) {
-      sound.mute(isMusicMuted);
+    if (soundRef.current) {
+      soundRef.current.mute(isMusicMuted);
+      if (!isMusicMuted && !soundRef.current.playing()) {
+        soundRef.current.play();
+      }
     }
-  }, [sound, isMusicMuted]);
-
-  // Auto-play; retry on first user interaction for Safari/iOS autoplay policy
-  useEffect(() => {
-    const tryPlay = () => {
-      play();
-    };
-    tryPlay();
-
-    const onInteraction = () => { tryPlay(); removeListeners(); };
-    const events = ["click", "touchstart", "keydown", "mousedown", "pointerdown"] as const;
-    const removeListeners = () => events.forEach(e => document.removeEventListener(e, onInteraction));
-
-    events.forEach(e => document.addEventListener(e, onInteraction, { once: true }));
-    return removeListeners;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [play]);
+  }, [isMusicMuted]);
 
   return null;
 }
