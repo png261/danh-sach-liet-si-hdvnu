@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import useSound from "use-sound";
 import type { Howl } from "howler";
 
+import { useCemeteryStore } from "@/app/hooks/useCemeteryStore";
+
 // Expose the underlying Howl instance on window so useMartyrTTS
 // can call .fade() to duck the music during TTS playback.
 declare global {
@@ -11,6 +13,8 @@ declare global {
 }
 
 export default function BackgroundMusic() {
+  const isMusicMuted = useCemeteryStore((state) => state.isMusicMuted);
+
   const [play, { sound }] = useSound(
     "https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3",
     { volume: 0.18, loop: true, interrupt: false }
@@ -19,12 +23,26 @@ export default function BackgroundMusic() {
   // Expose Howl instance for external fade control (e.g. useMartyrTTS)
   useEffect(() => {
     if (sound) window.bgMusic = sound as unknown as Howl;
-    return () => { window.bgMusic = undefined; };
+    return () => { 
+      if (sound) {
+        sound.stop();
+      }
+      window.bgMusic = undefined; 
+    };
   }, [sound]);
+
+  // Handle mute/unmute
+  useEffect(() => {
+    if (sound) {
+      sound.mute(isMusicMuted);
+    }
+  }, [sound, isMusicMuted]);
 
   // Auto-play; retry on first user interaction for Safari/iOS autoplay policy
   useEffect(() => {
-    const tryPlay = () => play();
+    const tryPlay = () => {
+      play();
+    };
     tryPlay();
 
     const onInteraction = () => { tryPlay(); removeListeners(); };
@@ -34,7 +52,7 @@ export default function BackgroundMusic() {
     events.forEach(e => document.addEventListener(e, onInteraction, { once: true }));
     return removeListeners;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [play]);
 
   return null;
 }

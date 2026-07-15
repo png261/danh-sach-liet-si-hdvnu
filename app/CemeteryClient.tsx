@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback, useTransition } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { Search, RotateCcw, MapPin, Calendar, Map, Info, ChevronLeft, ChevronRight, Crosshair, Activity, ArrowLeft, Filter, X, User, Grid } from "lucide-react";
+import { Search, RotateCcw, MapPin, Calendar, Map, Info, ChevronLeft, ChevronRight, Crosshair, Activity, ArrowLeft, Filter, X, User, Grid, Home, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 
 import type { Martyr } from "@/app/types/martyr";
@@ -87,7 +87,9 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
     isModalOpen,
     setIsModalOpen,
     isBottomCardOpen,
-    setIsBottomCardOpen
+    setIsBottomCardOpen,
+    isMusicMuted,
+    setIsMusicMuted
   } = useCemeteryStore();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFilterModalOpen,    setIsFilterModalOpen]    = useState(false);
@@ -373,8 +375,22 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
       <BackgroundMusic />
       <div className={`app-layout-root${isPending ? " layout-pending" : ""}`}>
       <header className="app-header">
-        {/* Left: Logos + Title */}
+        {/* Left: Logos + Navigation */}
         <div className="header-left">
+          {/* Back to Home Button */}
+          <button 
+            onClick={() => setSelectedCemetery("")} 
+            className="header-home-btn"
+            title="Quay lại trang chủ"
+            aria-label="Quay lại trang chủ"
+          >
+            <Home size={16} />
+            <span className="home-btn-text">Trang chủ</span>
+          </button>
+
+          {/* Vertical line separator */}
+          <div className="header-separator" />
+
           {/* Logos */}
           <div className="header-logos">
             <a 
@@ -386,16 +402,6 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
               <Image src="/logo_svtn.webp" alt="Logo Đội Sinh viên tình nguyện Hải Dương tại Đại học Quốc gia Hà Nội" className="logo-img" width={40} height={40} style={{ objectFit: "contain" }} />
             </a>
             <Image src="/logo_doan_xa.webp" alt="Logo Đoàn xã Tứ Kỳ" className="logo-img" width={40} height={40} style={{ objectFit: "contain" }} />
-          </div>
-
-          {/* Vertical line separator */}
-          <div className="header-separator" />
-
-          {/* Titles */}
-          <div className="header-title-container">
-            <h1 className="header-title-text">
-              Nghĩa trang xã Tứ Kỳ
-            </h1>
           </div>
         </div>
 
@@ -509,6 +515,8 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
                   selectedMartyrId={selectedMartyr?.id}
                   onSelectMartyr={handleOpenDetails}
                   onSelectZone={setSelectedZone}
+                  isMusicMuted={isMusicMuted}
+                  onToggleMusic={() => setIsMusicMuted(!isMusicMuted)}
                 />
               </ErrorBoundary>
             </section>

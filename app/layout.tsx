@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Merriweather } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -6,6 +6,13 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import NextTopLoader from "nextjs-toploader";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-primary",

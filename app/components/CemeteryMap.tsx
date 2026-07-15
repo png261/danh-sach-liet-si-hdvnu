@@ -6,6 +6,7 @@ import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "reac
 import type { Martyr } from "@/app/types/martyr";
 import { getPhysicalZone, groupMartyrsByRow } from "@/app/lib/martyrUtils";
 import { useMediaQuery } from "usehooks-ts";
+import { ZoomIn, ZoomOut, RotateCcw, Volume2, VolumeX } from "lucide-react";
 
 interface CemeteryMapProps {
   selectedCemetery: string;
@@ -14,6 +15,8 @@ interface CemeteryMapProps {
   selectedMartyrId?: string;
   onSelectMartyr: (martyr: Martyr) => void;
   onSelectZone: (zone: string) => void;
+  isMusicMuted?: boolean;
+  onToggleMusic?: () => void;
 }
 
 interface ZoneBoundary {
@@ -34,7 +37,9 @@ export default function CemeteryMap({
   allMartyrs,
   selectedMartyrId,
   onSelectMartyr,
-  onSelectZone
+  onSelectZone,
+  isMusicMuted,
+  onToggleMusic
 }: CemeteryMapProps) {
 
   // --- Tooltip & Interaction State ---
@@ -263,8 +268,8 @@ export default function CemeteryMap({
                 onClick={() => zoomIn()} 
                 title="Phóng to bản đồ"
                 style={{ 
-                  height: "36px", 
-                  padding: "0 12px",
+                  height: isMobile ? "34px" : "40px", 
+                  padding: isMobile ? "0 8px" : "0 14px",
                   borderRadius: "8px", 
                   backgroundColor: "#FFFFFF", 
                   border: "1px solid var(--card-border)", 
@@ -273,22 +278,24 @@ export default function CemeteryMap({
                   justifyContent: "center",
                   cursor: "pointer",
                   color: "var(--text-bright)",
-                  fontWeight: "500",
-                  fontSize: "13px",
+                  fontWeight: "600",
+                  fontSize: isMobile ? "11px" : "13.5px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  transition: "background-color 0.2s"
+                  transition: "background-color 0.2s",
+                  gap: isMobile ? "4px" : "6px"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
               >
-                Phóng to
+                <ZoomIn size={isMobile ? 12 : 15} />
+                <span>Phóng to</span>
               </button>
               <button 
                 onClick={() => zoomOut()} 
                 title="Thu nhỏ bản đồ"
                 style={{ 
-                  height: "36px", 
-                  padding: "0 12px",
+                  height: isMobile ? "34px" : "40px", 
+                  padding: isMobile ? "0 8px" : "0 14px",
                   borderRadius: "8px", 
                   backgroundColor: "#FFFFFF", 
                   border: "1px solid var(--card-border)", 
@@ -297,22 +304,24 @@ export default function CemeteryMap({
                   justifyContent: "center",
                   cursor: "pointer",
                   color: "var(--text-bright)",
-                  fontWeight: "500",
-                  fontSize: "13px",
+                  fontWeight: "600",
+                  fontSize: isMobile ? "11px" : "13.5px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  transition: "background-color 0.2s"
+                  transition: "background-color 0.2s",
+                  gap: isMobile ? "4px" : "6px"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
               >
-                Thu nhỏ
+                <ZoomOut size={isMobile ? 12 : 15} />
+                <span>Thu nhỏ</span>
               </button>
               <button 
                 onClick={() => resetTransform()} 
                 title="Đặt lại bản đồ về mặc định"
                 style={{ 
-                  height: "36px", 
-                  padding: "0 12px",
+                  height: isMobile ? "34px" : "40px", 
+                  padding: isMobile ? "0 8px" : "0 14px",
                   borderRadius: "8px", 
                   backgroundColor: "#FFFFFF", 
                   border: "1px solid var(--card-border)", 
@@ -321,16 +330,46 @@ export default function CemeteryMap({
                   justifyContent: "center",
                   cursor: "pointer",
                   color: "var(--text-bright)",
-                  fontWeight: "500",
-                  fontSize: "13px",
+                  fontWeight: "600",
+                  fontSize: isMobile ? "11px" : "13.5px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  transition: "background-color 0.2s"
+                  transition: "background-color 0.2s",
+                  gap: isMobile ? "4px" : "6px"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
               >
-                Đặt lại
+                <RotateCcw size={isMobile ? 12 : 15} />
+                <span>Đặt lại</span>
               </button>
+              {onToggleMusic && (
+                <button 
+                  onClick={onToggleMusic} 
+                  title={isMusicMuted ? "Bật nhạc nền" : "Tắt nhạc nền"}
+                  style={{ 
+                    height: isMobile ? "34px" : "40px", 
+                    padding: isMobile ? "0 8px" : "0 14px",
+                    borderRadius: "8px", 
+                    backgroundColor: "#FFFFFF", 
+                    border: "1px solid var(--card-border)", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "var(--text-bright)",
+                    fontWeight: "600",
+                    fontSize: isMobile ? "11px" : "13.5px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    transition: "background-color 0.2s",
+                    gap: isMobile ? "4px" : "6px"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F5EFE2"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#FFFFFF"}
+                >
+                  {isMusicMuted ? <VolumeX size={isMobile ? 12 : 15} /> : <Volume2 size={isMobile ? 12 : 15} />}
+                  <span>{isMusicMuted ? "Bật nhạc" : "Tắt nhạc"}</span>
+                </button>
+              )}
             </div>
 
             <TransformComponent

@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import { Howl } from "howler";
-import { ArrowRight, Play, Calendar } from "lucide-react";
+import { ArrowRight, Play, Calendar, Volume2, VolumeX, Disc } from "lucide-react";
 import { motion } from "framer-motion";
 import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -14,6 +14,7 @@ import Masonry from "react-masonry-css";
 
 
 import { CloudDivider } from "@/app/components/VietnameseMotifs";
+import { useCemeteryStore } from "@/app/hooks/useCemeteryStore";
 
 interface ProjectIntroProps {
   onEnterSearch: () => void;
@@ -92,6 +93,9 @@ function CinematicText({ text, style, className, animate = "visible", delay = 0 
 }
 
 export default function ProjectIntro({ onEnterSearch, startAnimation = true }: ProjectIntroProps) {
+  const isMusicMuted = useCemeteryStore((state) => state.isMusicMuted);
+  const setIsMusicMuted = useCemeteryStore((state) => state.setIsMusicMuted);
+
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
@@ -99,22 +103,25 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
   const [gallerySectionRef, gallerySectionInView] = useInView({ triggerOnce: true, threshold: 0.15 });
   const [footerRef, footerInView] = useInView({ triggerOnce: true, threshold: 0.2 });
   
+  const soundRef = useRef<Howl | null>(null);
 
   useEffect(() => {
     const sound = new Howl({
       src: ["https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/intro_bgm.mp3"],
-      html5: false,
+      html5: true,
       loop: true,
-      volume: 0
+      volume: 0.55,
+      autoplay: !isMusicMuted
     });
+    soundRef.current = sound;
+    sound.mute(isMusicMuted);
 
     const tryPlay = () => {
       if (sound.state() === "unloaded") {
         sound.load();
       }
-      if (!sound.playing()) {
+      if (!sound.playing() && !isMusicMuted) {
         sound.play();
-        sound.fade(sound.volume(), 0.55, 2000);
       }
     };
 
@@ -133,19 +140,28 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
       window.removeEventListener("pointerdown", handleInteraction);
     };
 
-    if (!sound.playing()) {
-      window.addEventListener("click", handleInteraction);
-      window.addEventListener("touchstart", handleInteraction);
-      window.addEventListener("mousedown", handleInteraction);
-      window.addEventListener("keydown", handleInteraction);
-      window.addEventListener("pointerdown", handleInteraction);
-    }
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("touchstart", handleInteraction);
+    window.addEventListener("mousedown", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+    window.addEventListener("pointerdown", handleInteraction);
 
     return () => {
       removeListeners();
       sound.unload();
+      soundRef.current = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.mute(isMusicMuted);
+      if (!isMusicMuted && !soundRef.current.playing()) {
+        soundRef.current.play();
+      }
+    }
+  }, [isMusicMuted]);
 
   const scrollToGallery = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -516,6 +532,39 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
           </a>
         </p>
       </motion.footer>
+
+      {/* Floating Music Player Widget */}
+      <div 
+        className={`intro-music-player ${isMusicMuted ? "muted" : "playing"}`}
+        title={isMusicMuted ? "Bật nhạc nền" : "Tắt nhạc nền"}
+      >
+        {/* Spinning Vinyl Record Disc */}
+        <div className={`music-player-disc ${isMusicMuted ? "" : "spinning"}`}>
+          <Disc size={18} className="disc-icon" />
+          <div className="disc-center-dot"></div>
+        </div>
+
+        {/* Song Info & Marquee */}
+        <div className="music-player-info" onClick={() => setIsMusicMuted(!isMusicMuted)}>
+          <div className="music-player-title-wrapper">
+            <span className="music-player-title">
+              Cùng anh đi tình nguyện
+            </span>
+          </div>
+          <span className="music-player-artist">
+            Đội SVTN Hải Dương tại ĐHQGHN
+          </span>
+        </div>
+
+        {/* Mute/Play Control Button */}
+        <button 
+          onClick={() => setIsMusicMuted(!isMusicMuted)}
+          className="music-player-control-btn"
+          aria-label={isMusicMuted ? "Bật nhạc nền" : "Tắt nhạc nền"}
+        >
+          {isMusicMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+        </button>
+      </div>
     </div>
   );
 }

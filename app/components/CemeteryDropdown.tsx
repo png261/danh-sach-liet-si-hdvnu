@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, MapPin } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 const CEMETERIES = [
   { value: "Nghĩa trang liệt sĩ Tứ Kỳ",    fullLabel: "Nghĩa trang liệt sĩ Tứ Kỳ", shortLabel: "NTLS Tứ Kỳ" },
@@ -26,7 +26,6 @@ export default function CemeteryDropdown({ value, onOpenModal }: CemeteryDropdow
         onClick={onOpenModal}
         aria-label="Chọn nghĩa trang"
       >
-        <MapPin size={13} className="cem-dropdown__pin" />
         <span className="cem-dropdown__label cem-dropdown__label--full">{selected.fullLabel}</span>
         <span className="cem-dropdown__label cem-dropdown__label--short">{selected.shortLabel}</span>
         <ChevronDown size={14} className="cem-dropdown__chevron" />
