@@ -58,8 +58,8 @@ export function useMartyrTTS(martyr: Martyr) {
 
     setIsLoading(true);
 
-    // Thử phát file âm thanh đã được gen sẵn trên Supabase
-    const audioUrl = `https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/audios/${makeSafeId(martyr.id)}.mp3`;
+    // Thử phát file âm thanh tĩnh (nếu có) hoặc fallback Web Speech API
+    const audioUrl = `/audios/${makeSafeId(martyr.id)}.mp3`;
     
     const playPreGenerated = () => {
       return new Promise<boolean>((resolve) => {

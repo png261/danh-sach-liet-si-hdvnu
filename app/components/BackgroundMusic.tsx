@@ -17,7 +17,7 @@ export default function BackgroundMusic() {
   useEffect(() => {
     // Create Howl instance
     const sound = new Howl({
-      src: ["https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/bg_music.mp3"],
+      src: ["/bg_music.mp3"],
       html5: true,
       loop: true,
       volume: 0.18,

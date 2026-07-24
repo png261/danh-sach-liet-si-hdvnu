@@ -77,24 +77,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Cached function to fetch martyrs on the server
-async function fetchMartyrs(cemeteryName: string): Promise<Martyr[]> {
+// Cached function to fetch martyrs on the server with local dataset fallback
+async function fetchMartyrs(cemeteryName: string, cemeterySlug: string): Promise<Martyr[]> {
   "use cache";
   cacheLife("hours"); // Cache the query result for hours
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
-  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if (supabaseUrl && supabaseKey) {
+      const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+      const { data, error } = await supabase
+        .from("martyrs")
+        .select("*")
+        .eq("cemetery", cemeteryName);
 
-  const { data } = await supabase
-    .from("martyrs")
-    .select("*")
-    .eq("cemetery", cemeteryName);
-
-  if (data) {
-    return data.map((m: Martyr) => ({ ...m, cemetery: m.cemetery.normalize("NFC") }));
+      if (data && data.length > 0 && !error) {
+        return data.map((m: Martyr) => ({ ...m, cemetery: m.cemetery.normalize("NFC") }));
+      }
+    }
+  } catch (err) {
+    console.warn("Supabase fetch failed, falling back to local JSON data:", err);
   }
-  return [];
+
+  // Fallback to local static JSON file in public/data/
+  try {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const filePath = path.join(process.cwd(), "public", "data", `${cemeterySlug}.json`);
+    const content = await fs.readFile(filePath, "utf-8");
+    const data = JSON.parse(content);
+    return data.map((m: Martyr) => ({ ...m, cemetery: m.cemetery.normalize("NFC") }));
+  } catch (err) {
+    console.error("Local JSON fallback failed:", err);
+    return [];
+  }
 }
 
 export default async function Page({ params }: Props) {
@@ -103,8 +120,8 @@ export default async function Page({ params }: Props) {
   const cemeteryName = SLUG_TO_CEMETERY[cemeterySlug?.toLowerCase() ?? ""];
 
   let martyrs: Martyr[] = [];
-  if (cemeteryName) {
-    martyrs = await fetchMartyrs(cemeteryName);
+  if (cemeteryName && cemeterySlug) {
+    martyrs = await fetchMartyrs(cemeteryName, cemeterySlug);
   }
 
   // Schema.org Structured Data for SEO optimization

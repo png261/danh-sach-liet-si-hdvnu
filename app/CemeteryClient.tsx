@@ -195,7 +195,7 @@ export default function CemeteryClient({ initialCemeterySlug, initialMartyrs }: 
           {/* Spin traditional Vietnamese motif */}
           <div className="loader-spinner-wrapper">
             <Image 
-              src="https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets/trong_dong.svg" 
+              src="/trong_dong.svg" 
               alt="Trống đồng Đông Sơn" 
               width={120}
               height={120}

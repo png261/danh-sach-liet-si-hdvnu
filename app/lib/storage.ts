@@ -1,8 +1,9 @@
-// Supabase Storage CDN base URL for public assets
-export const STORAGE_URL =
-  "https://lclvxneuknlwkwsatnwm.supabase.co/storage/v1/object/public/assets";
+// Static assets base URL served via Vercel/Next.js CDN (0 Supabase Storage egress)
+export const STORAGE_URL = "";
 
-/** Returns the full CDN URL for a given asset filename */
+/** Returns the full CDN/local URL for a given asset filename */
 export function asset(filename: string): string {
-  return `${STORAGE_URL}/${filename}`;
+  const clean = filename.replace(/^\//, "");
+  return `/${clean}`;
 }
+
