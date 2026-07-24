@@ -107,7 +107,7 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
 
   useEffect(() => {
     const sound = new Howl({
-      src: ["/bgm.mp3"],
+      src: ["/intro_bgm.mp3"],
       html5: true,
       loop: true,
       volume: 0.55,
@@ -192,7 +192,7 @@ export default function ProjectIntro({ onEnterSearch, startAnimation = true }: P
         }}
       >
         <video 
-          src="/cemetery_background_loop.mp4" 
+          src="/intro_bg_video.mp4" 
           autoPlay 
           loop 
           muted 

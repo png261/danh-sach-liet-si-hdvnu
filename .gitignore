@@ -60,12 +60,9 @@ public/bgm.mp3
 # Large source data (partitioned into public/data/ at build time)
 /data/martyrs_db.json
 
-# Large media files (too big for GitHub - host on CDN/Vercel instead)
-public/intro_bg_video.mp4
-public/bgm.mp3
-public/intro_bgm.mp3
 public/panorama-tour/assets/background-audio.mp3
 public/panorama-tour/
+
 
 # Temporary python scripts caching
 /scripts/temp_audios/
